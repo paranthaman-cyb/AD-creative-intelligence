@@ -1,0 +1,1436 @@
+================================================================================
+AD CREATIVE INTELLIGENCE -- COMPLETE CODEBASE & CODE NAVIGATION GUIDE
+================================================================================
+Generated for: Technical Presentations, Code Reviews & Judge Demonstrations
+Platform: React 18 + TypeScript + Vite (Client-Side Architecture)
+Workspace Root: d:\AD-creative-intelligence
+Target File: PROJECT_CODEBASE_GUIDE.txt
+================================================================================
+
+TABLE OF CONTENTS
+-----------------
+1. ARCHITECTURE OVERVIEW & EXECUTIVE SUMMARY
+2. COMPLETE PROJECT DIRECTORY AND FILE STRUCTURE
+3. FILE-BY-FILE TECHNICAL BREAKDOWN
+4. JUDGE QUESTIONS: EXACT FILE PATHS (FEATURES A THROUGH AI)
+5. END-TO-END SYSTEM EXECUTION FLOW & DATA MOVEMENT
+6. TECHNICAL STACK & LIBRARIES ANALYSIS
+7. CORE FUNCTIONS & ALGORITHMS REFERENCE CATALOG
+8. JUDGE DEMONSTRATION CHEAT SHEET (18 COMMON QUESTIONS & ANSWERS)
+9. RELIABLE LINE-NUMBER NAVIGATION METHOD
+10. TOP 5 CRITICAL SOURCE FILES TO MASTER BEFORE PRESENTATION
+
+
+================================================================================
+1. ARCHITECTURE OVERVIEW & EXECUTIVE SUMMARY
+================================================================================
+
+1.1 ARCHITECTURAL PRINCIPLE: 100% CLIENT-SIDE PRIVACY & ZERO LATENCY
+Ad Creative Intelligence is an advanced creative analytics web application built
+on React 18, TypeScript, and Vite. 
+
+A fundamental design decision of this system is that it operates 100% CLIENT-SIDE
+directly in the user's browser.
+- No remote backend server (FastAPI/Node/Django) is required.
+- No database (PostgreSQL/MongoDB) is needed.
+- No creative images or sensitive advertising performance metrics (spend, revenue)
+  are ever transmitted over external networks or stored in third-party clouds.
+- Image decoding and visual feature extraction are performed locally via the
+  HTML5 Canvas 2D Context API.
+- CSV parsing is performed locally via PapaParse with client-side chunking.
+- Statistical analysis (Welch's t-test, two-proportion z-tests, Wald 95%
+  confidence intervals) is executed client-side in sub-millisecond time.
+
+1.2 THE "150 IMAGES VS. 24 RESULTS" CLARIFICATION
+Judges may ask: "Why did an upload of 150 creative images generate only 24 rows?"
+The architecture makes a clear, rigorous distinction between two data outputs:
+
+- OUTPUT A: CREATIVE-LEVEL ANALYSIS (150 ROWS)
+  Every single uploaded creative image asset is processed, extracted, and matched
+  against the CSV. The Image-Level Export ("Export Creatives CSV") contains exactly
+  150 rows, documenting dimensions, dominant color, contrast, brightness,
+  saturation, complexity, impressions, clicks, conversions, spend, CTR, CVR, CPA,
+  and ROAS for every asset.
+
+- OUTPUT B: AGGREGATE STATISTICAL RANKINGS (24 ROWS)
+  Findings represent statistical hypotheses comparing contrasting cohorts of
+  creatives (e.g. High Contrast vs. Low Contrast, Vibrant vs. Muted, Cool vs. Warm)
+  evaluated across 4 metrics (CTR, CVR, CPA, ROAS). 
+  6 binary attribute pairs multiplied by up to 4 applicable metrics produces
+  exactly 24 statistical findings.
+
+Both outputs are accessible, auditable, and downloadable directly from the UI.
+
+
+================================================================================
+2. COMPLETE PROJECT DIRECTORY AND FILE STRUCTURE
+================================================================================
+
+d:\AD-creative-intelligence\
+|
+|-- index.html                                (HTML5 Application Entry Point)
+|-- package.json                              (Project Dependencies & Build Scripts)
+|-- package-lock.json                         (Deterministic Lockfile)
+|-- tsconfig.json                             (TypeScript Compiler Configuration)
+|-- tsconfig.node.json                        (Node-Environment TS Configuration)
+|-- vite.config.ts                            (Vite & Vitest Configuration)
+|-- tailwind.config.js                        (Design Tokens & Tailwind Theme)
+|-- postcss.config.js                         (PostCSS Configuration for Autoprefixer)
+|-- .eslintrc.cjs                             (ESLint Rules & Parser Config)
+|-- .gitignore                                (Git Exclusion Rules)
+|-- .env.example                              (Environment Variable Template)
+|-- AGENTS.md                                 (Repository Guidelines for Agents)
+|-- README.md                                 (Project Overview & Quickstart)
+|-- PROJECT_CODEBASE_GUIDE.txt                (This Comprehensive Reference Guide)
+|
+|-- public/                                   (Static Assets & Demonstration Data)
+|   |-- creatives/                            (150 Real Ad Creative PNGs: ad_001.png - ad_150.png)
+|   |-- dataset/
+|   |   |-- creative_performance.csv          (Sample Benchmark Ad Performance CSV)
+|   |-- images/
+|       |-- purple_sneaker_ad.jpg             (Sample Creative Image)
+|
+|-- src/                                      (Application Source Code)
+|   |-- main.tsx                              (React DOM Initialization Root)
+|   |
+|   |-- app/                                  (Application Shell & Routing)
+|   |   |-- App.tsx                           (Root Provider Wrapper)
+|   |   |-- router.tsx                        (React Router v6 Route Definitions)
+|   |
+|   |-- components/                           (Reusable Visual Components)
+|   |   |-- charts/                           (Data Visualization via Recharts)
+|   |   |   |-- EvidenceDonutChart.tsx        (Evidence Status Distribution Donut)
+|   |   |   |-- GroupComparisonBarChart.tsx   (Group A vs Group B Metric Comparison Bar)
+|   |   |   |-- PerformanceLineChart.tsx      (Time-Series Performance Trend Line)
+|   |   |-- findings/
+|   |   |   |-- FindingCard.tsx               (Interactive Finding Card with Status Badge)
+|   |   |-- layout/
+|   |   |   |-- AppShell.tsx                  (Master Layout with Navigation & Sidebar)
+|   |   |   |-- Header.tsx                    (Top Bar Header with Title & Context)
+|   |   |   |-- Sidebar.tsx                   (Collapsible Navigation Sidebar)
+|   |   |-- ui/                               (Atomic UI Primitives)
+|   |       |-- Badge.tsx                     (Evidence Status Badge: Supported/Inconclusive)
+|   |       |-- Button.tsx                    (Variant Styled Buttons)
+|   |       |-- Card.tsx                      (Container Surface Card)
+|   |       |-- Input.tsx                     (Form Input Element)
+|   |       |-- Modal.tsx                     (Accessible Modal Dialog)
+|   |       |-- Select.tsx                    (Dropdown Selection Element)
+|   |       |-- Tabs.tsx                      (Segmented Tab Controller)
+|   |
+|   |-- context/
+|   |   |-- AnalysisContext.tsx               (Global State Context for Session & Analysis)
+|   |
+|   |-- data/                                 (Embedded Benchmark & Demo Datasets)
+|   |   |-- realDataset.json                  (Original Hackathon 150-Creative Dataset JSON)
+|   |   |-- realDataset.ts                    (Typed Accessors for 150 Halcyon Meta Ads)
+|   |   |-- demo/
+|   |       |-- demoData.ts                   (Synthetic 60-Creative Demonstration Dataset)
+|   |
+|   |-- features/                             (Domain Feature Modules)
+|   |   |-- upload/
+|   |   |   |-- FileUpload.tsx                (Drag & Drop Image and CSV Uploader)
+|   |   |-- validation/
+|   |       |-- ColumnMapper.tsx              (Interactive CSV Header Mapping Component)
+|   |       |-- ValidationSummary.tsx         (Data Hygiene & Issue Audit Banner)
+|   |
+|   |-- hooks/
+|   |   |-- useAnalysis.ts                    (Convenience Consumer Hook for AnalysisContext)
+|   |
+|   |-- lib/
+|   |   |-- utils.ts                          (CSS Class Merging & General Utilities)
+|   |
+|   |-- pages/                                (Top-Level Page Views)
+|   |   |-- LandingPage.tsx                   (Welcome & Problem Formulation View)
+|   |   |-- AnalyzePage.tsx                   (4-Step Upload, Validate & Ingest Wizard)
+|   |   |-- DashboardPage.tsx                 (Executive KPI Overview & Top Creative)
+|   |   |-- ResultsPage.tsx                   (Dual Views: 150 Creatives Grid & 24 Ranked Findings)
+|   |   |-- FindingDetailPage.tsx             (Deep-Dive Statistical Evidence & CI Breakdown)
+|   |   |-- SettingsPage.tsx                  (Application Config & Attribution Settings)
+|   |
+|   |-- services/                             (Pure Computational Logic & Domain Services)
+|   |   |-- analysis/
+|   |   |   |-- featureExtraction.ts          (Canvas Image Feature Extraction & Reconciliation)
+|   |   |   |-- evidenceClassifier.ts         (Attribute Grouping & Statistical Finding Generation)
+|   |   |   |-- statisticalTests.ts           (Welch's t-test, Two-Proportion z-test, Wald 95% CI)
+|   |   |-- csv/
+|   |   |   |-- parseCsv.ts                   (PapaParse File & String Ingestion)
+|   |   |   |-- validateCsv.ts                (Data Validation, Type Coercion & Issue Tagging)
+|   |   |   |-- columnMapping.ts              (Header Fuzzy Matching & Canonical Field Schemas)
+|   |   |-- export/
+|   |   |   |-- exportCsv.ts                  (Dual Exporters: Image-Level CSV & Findings CSV)
+|   |   |-- metrics/
+|   |       |-- calculateMetrics.ts           (CTR, CVR, CPC, CPA, ROAS & True Aggregates)
+|   |       |-- formatters.ts                 (Currency, Percentage, Multiplier & CI String Formatting)
+|   |
+|   |-- styles/
+|   |   |-- index.css                         (Tailwind Directives & Custom Component Styling)
+|   |
+|   |-- types/
+|       |-- index.ts                          (Universal TypeScript Domain Interfaces & Enums)
+|
+|-- tests/                                    (Automated Vitest Test Suite)
+|   |-- setup.ts                              (Jest-DOM Environment Setup)
+|   |-- integration/
+|   |   |-- upload-flow.test.tsx              (End-to-End Component Integration Tests)
+|   |-- unit/
+|       |-- analysis.test.ts                  (Statistical Testing Verification)
+|       |-- csv-validation.test.ts            (CSV Parsing & Column Mapping Tests)
+|       |-- export.test.ts                    (CSV Export String Escaping & Formatting)
+|       |-- metrics.test.ts                   (CTR, CVR, CPA, ROAS Metric Integrity Tests)
+|       |-- pipeline-reconciliation.test.ts   (150-Creative & <24 Creative Ingestion Tests)
+|       |-- real-dataset.test.ts              (Integrity Tests for Halcyon Meta Dataset)
+|
+|-- docs/                                     (Architectural & Design System Documentation)
+    |-- AGENTS.md                             (Multi-Agent Collaboration Guidelines)
+    |-- ARCHITECTURE.md                       (System Topology & Data Flow Specifications)
+    |-- CODE_STYLE.md                         (Coding Standards & Linter Conventions)
+    |-- DATABASE.md                           (Client-Side Data Storage & Schema Design)
+    |-- DESIGN_SYSTEM.md                      (Color Tokens, Typography & Component States)
+    |-- PRD.md                                (Product Requirements Document)
+    |-- SECURITY.md                           (Data Privacy & Local Execution Policies)
+    |-- TESTING.md                            (Testing Strategy & Coverage Requirements)
+
+
+================================================================================
+3. FILE-BY-FILE TECHNICAL BREAKDOWN
+================================================================================
+
+3.1 ROOT CONFIGURATION FILES
+
+- [index.html](file:///d:/AD-creative-intelligence/index.html)
+  Relative Path: index.html
+  Main Responsibility: Single Page Application entry document loaded by browser.
+  Key Elements: <div id="root">, <script type="module" src="/src/main.tsx">.
+  Called By: Browser HTTP GET request.
+  Imports: /src/main.tsx.
+  Why Necessary: Hosts DOM mount point for React.
+
+- [package.json](file:///d:/AD-creative-intelligence/package.json)
+  Relative Path: package.json
+  Main Responsibility: Declares project metadata, npm scripts, dependencies, devDependencies.
+  Key Scripts: "dev", "build", "lint", "typecheck", "test".
+  Key Dependencies: react, react-dom, react-router-dom, papaparse, recharts, lucide-react, clsx, tailwind-merge, zod.
+  Key DevDependencies: vite, vitest, typescript, tailwindcss, @testing-library/react.
+  Why Necessary: Manages packages and build lifecycle.
+
+- [vite.config.ts](file:///d:/AD-creative-intelligence/vite.config.ts)
+  Relative Path: vite.config.ts
+  Main Responsibility: Bundler configuration for development server and production builds.
+  Key Elements: react() plugin, vitest environment: 'jsdom'.
+  Why Necessary: Enables fast HMR, TypeScript compilation, and automated test execution.
+
+- [tailwind.config.js](file:///d:/AD-creative-intelligence/tailwind.config.js)
+  Relative Path: tailwind.config.js
+  Main Responsibility: Declares theme extension, custom brand colors (purple, lavender), status colors.
+  Why Necessary: Enforces consistent, professional styling across all components.
+
+3.2 APPLICATION ENTRY & ROUTING
+
+- [src/main.tsx](file:///d:/AD-creative-intelligence/src/main.tsx)
+  Relative Path: src/main.tsx
+  Main Responsibility: Mounts React tree to DOM element #root using ReactDOM.createRoot.
+  Calls: ReactDOM.createRoot, App.
+  Imports: src/app/App.tsx, src/styles/index.css.
+  Why Necessary: Initializes React 18 Concurrent Mode runtime.
+
+- [src/app/App.tsx](file:///d:/AD-creative-intelligence/src/app/App.tsx)
+  Relative Path: src/app/App.tsx
+  Main Responsibility: Root application component. Wraps RouterProvider with AnalysisProvider.
+  Imports: src/context/AnalysisContext.tsx, src/app/router.tsx.
+  Why Necessary: Supplies global analysis state context to all route pages.
+
+- [src/app/router.tsx](file:///d:/AD-creative-intelligence/src/app/router.tsx)
+  Relative Path: src/app/router.tsx
+  Main Responsibility: Configures client-side routing via React Router v6 createBrowserRouter.
+  Routes Configured:
+    '/'          -> LandingPage
+    '/analyze'   -> AnalyzePage
+    '/dashboard' -> DashboardPage
+    '/results'   -> ResultsPage
+    '/results/:id' -> FindingDetailPage
+    '/settings'  -> SettingsPage
+  Imports: AppShell and all page components.
+  Why Necessary: Enables seamless single-page navigation without server roundtrips.
+
+3.3 GLOBAL STATE & DATA STORAGE
+
+- [src/context/AnalysisContext.tsx](file:///d:/AD-creative-intelligence/src/context/AnalysisContext.tsx)
+  Relative Path: src/context/AnalysisContext.tsx
+  Main Responsibility: Global state container managing active dataset, uploaded files, performance records,
+  aggregate metrics, time-series trends, ranked findings, and pipeline diagnostics.
+  Important Functions:
+    loadRealDataset()        - Loads default Halcyon 150-creative benchmark dataset.
+    loadDemoData()           - Loads synthetic 60-creative demo dataset.
+    setUploadedDataset()     - Ingests newly processed uploaded files and recomputes findings.
+    updateCreativeAttribute() - Allows manual editing/reviewing of creative attribute tags.
+    resetSession()           - Clears active session for a fresh upload.
+    getFindingById()         - Looks up finding details for the deep-dive page.
+  Imports: realDataset.ts, demoData.ts, calculateMetrics.ts, evidenceClassifier.ts.
+  Why Necessary: Central nervous system of the application; connects data ingestion to UI views.
+
+- [src/data/realDataset.ts](file:///d:/AD-creative-intelligence/src/data/realDataset.ts)
+  Relative Path: src/data/realDataset.ts
+  Main Responsibility: Exports typed real benchmark dataset representing 150 Halcyon Meta ad creatives.
+  Important Variables:
+    REAL_CREATIVES           - Array of 150 Creative objects with extracted visual attributes.
+    REAL_PERFORMANCE_RECORDS - Array of 150 matching PerformanceRecord objects (spend, imps, clicks, convs, rev).
+    REAL_AGGREGATES          - True aggregate KPI metrics.
+    REAL_FINDINGS            - 24 precomputed statistical findings.
+  Imports: src/data/realDataset.json, calculateMetrics.ts, evidenceClassifier.ts.
+  Why Necessary: Provides instant out-of-the-box demonstration data without needing manual file uploads.
+
+- [src/data/realDataset.json](file:///d:/AD-creative-intelligence/src/data/realDataset.json)
+  Relative Path: src/data/realDataset.json
+  Main Responsibility: Raw JSON document containing the 150 creative assets, metrics, and summary data.
+  Why Necessary: Embedded offline data store.
+
+3.4 IMAGE & CSV PROCESSING SERVICES
+
+- [src/services/analysis/featureExtraction.ts](file:///d:/AD-creative-intelligence/src/services/analysis/featureExtraction.ts)
+  Relative Path: src/services/analysis/featureExtraction.ts
+  Main Responsibility: Client-side computer vision heuristics and bidirectional dataset reconciliation.
+  Important Functions:
+    normalizeIdentifier(val)           - Strips extensions and non-alphanumerics ('ad_001.png' -> 'ad001').
+    categorizeAspectRatio(ratio)       - Classifies numerical ratios into social ad format tags (1:1, 9:16, 4:5, 16:9).
+    extractImageFeatures(file)         - Decodes image onto 32x32 canvas; measures luma, contrast, saturation, palette, edges.
+    buildCreativeRecord(...)           - Packages extracted heuristics with metadata and provenance.
+    reconcileCreativesAndImages(...)   - Bidirectionally matches uploaded images with CSV records; zero silent drops.
+    processBatchImageFeatures(...)     - Concurrency-controlled batch processor (10 images/batch) preventing UI freeze.
+  Imports: src/types/index.ts.
+  Why Necessary: Core computer vision engine that turns raw images into structured statistical variables.
+
+- [src/services/csv/parseCsv.ts](file:///d:/AD-creative-intelligence/src/services/csv/parseCsv.ts)
+  Relative Path: src/services/csv/parseCsv.ts
+  Main Responsibility: Wraps PapaParse for safe client-side CSV parsing.
+  Important Functions:
+    parseCsvString(str) - Parses CSV string into headers and rows.
+    parseCsvFile(file)   - Parses HTML5 File object via PapaParse stream.
+  Why Necessary: Robustly handles escaped quotes, custom delimiters, empty lines, and trailing spaces.
+
+- [src/services/csv/columnMapping.ts](file:///d:/AD-creative-intelligence/src/services/csv/columnMapping.ts)
+  Relative Path: src/services/csv/columnMapping.ts
+  Main Responsibility: Defines canonical fields and regex heuristic patterns to auto-map uploaded CSV columns.
+  Important Constants & Functions:
+    CANONICAL_FIELDS            - Required fields (creativeId, impressions, clicks) and optional fields.
+    AUTO_DETECT_PATTERNS        - Heuristic regex mapping for headers like 'ad_id', 'imps', 'convs', 'spend'.
+    autoDetectColumnMapping(...) - Analyzes uploaded headers and returns best-guess mapping.
+    validateColumnMapping(...)   - Verifies that mandatory columns are properly mapped.
+  Why Necessary: Allows users to upload arbitrary ad platform exports (Meta, Google, TikTok) without manual reformatting.
+
+- [src/services/csv/validateCsv.ts](file:///d:/AD-creative-intelligence/src/services/csv/validateCsv.ts)
+  Relative Path: src/services/csv/validateCsv.ts
+  Main Responsibility: Audits parsed CSV rows, coerces numeric strings, detects data anomalies.
+  Important Functions:
+    validateAndNormalizeCsv(...) - Validates non-negative values, checks clicks <= impressions,
+                                   creates typed PerformanceRecord items, generates ValidationIssues.
+  Why Necessary: Prevents NaN crashes, division by zero, and invalid data corruption.
+
+3.5 METRICS & STATISTICAL ANALYSIS SERVICES
+
+- [src/services/metrics/calculateMetrics.ts](file:///d:/AD-creative-intelligence/src/services/metrics/calculateMetrics.ts)
+  Relative Path: src/services/metrics/calculateMetrics.ts
+  Main Responsibility: Implements core advertising ratio calculations and true dataset aggregates.
+  Important Functions:
+    calculateCtr(clicks, impressions)       - Click-Through Rate = clicks / impressions.
+    calculateCvr(conversions, clicks)       - Conversion Rate = conversions / clicks.
+    calculateCpc(spend, clicks)             - Cost Per Click = spend / clicks.
+    calculateCpa(spend, conversions)        - Cost Per Acquisition = spend / conversions.
+    calculateRoas(revenue, spend)           - Return on Ad Spend = revenue / spend.
+    calculateAggregates(records, count)     - True sum of numerators divided by sum of denominators.
+  Why Necessary: Guarantees mathematical accuracy. Prevents the common statistical flaw of averaging row-level ratios.
+
+- [src/services/analysis/statisticalTests.ts](file:///d:/AD-creative-intelligence/src/services/analysis/statisticalTests.ts)
+  Relative Path: src/services/analysis/statisticalTests.ts
+  Main Responsibility: Implements inferential statistics: two-sample proportion tests and Welch's t-test.
+  Important Functions:
+    compareProportions(...) - Computes standard error, z-score, p-value, and 95% Wald CI for CTR and CVR.
+    compareMeans(...)       - Welch's two-sample t-test with 95% CI for continuous metrics (CPA, ROAS, CPC).
+    normalCdf(z)            - Abramowitz & Stegun standard normal cumulative distribution approximation.
+  Why Necessary: Powers evidence classification; separates real performance lifts from random sample noise.
+
+- [src/services/analysis/evidenceClassifier.ts](file:///d:/AD-creative-intelligence/src/services/analysis/evidenceClassifier.ts)
+  Relative Path: src/services/analysis/evidenceClassifier.ts
+  Main Responsibility: Groups creatives by visual attributes, runs hypothesis tests, and ranks findings.
+  Important Functions:
+    extractAttributeGroups(creatives, perf) - Partitions creatives into contrasting cohorts (e.g. High vs Low Contrast).
+    generateFindings(creatives, perf, id)   - Runs statistical tests across all metrics; classifies status as
+                                              'supported' (CI excludes zero), 'inconclusive' (CI spans zero),
+                                              or 'underpowered' (sample size < 20).
+  Why Necessary: Automatically discovers which creative attributes drive advertising performance.
+
+- [src/services/metrics/formatters.ts](file:///d:/AD-creative-intelligence/src/services/metrics/formatters.ts)
+  Relative Path: src/services/metrics/formatters.ts
+  Main Responsibility: Formats raw numbers into localized currency, percentage, and confidence interval strings.
+  Important Functions:
+    formatCurrency(val)            - $1,234.56
+    formatPercent(val)             - 2.4%
+    formatEffectSize(val, metric)  - Metric-aware (+0.4%, -$3.50, +1.20x)
+    formatConfidenceInterval(ci)   - Metric-aware ([+0.1%, +0.8%], [$1.20, $4.50])
+  Why Necessary: Ensures consistent, readable data presentation across charts, cards, tables, and CSV exports.
+
+- [src/services/export/exportCsv.ts](file:///d:/AD-creative-intelligence/src/services/export/exportCsv.ts)
+  Relative Path: src/services/export/exportCsv.ts
+  Main Responsibility: Serializes results into CSV format and triggers browser file downloads.
+  Important Functions:
+    exportImageLevelCsv(...)  - Output A: Generates 22-column CSV with all 150 creative assets.
+    exportFindingsToCsv(...)  - Output B: Generates 14-column CSV with 24 ranked statistical findings.
+    downloadCsvFile(...)      - In-memory Blob download trigger using hidden <a> element.
+  Why Necessary: Provides judges and marketers with downloadable, auditable spreadsheets.
+
+3.6 PAGE COMPONENTS
+
+- [src/pages/LandingPage.tsx](file:///d:/AD-creative-intelligence/src/pages/LandingPage.tsx)
+  Relative Path: src/pages/LandingPage.tsx
+  Main Responsibility: Welcome hero page; explains problem formulation and provides quickstart buttons.
+  Imports: useAnalysis, Button, Card, Lucide icons.
+
+- [src/pages/AnalyzePage.tsx](file:///d:/AD-creative-intelligence/src/pages/AnalyzePage.tsx)
+  Relative Path: src/pages/AnalyzePage.tsx
+  Main Responsibility: 4-stage wizard: 1 Upload Files -> 2 Validate & Map -> 3 Batch Feature Extraction -> 4 Results.
+  Imports: FileUpload, ColumnMapper, ValidationSummary, featureExtraction, AnalysisContext.
+
+- [src/pages/DashboardPage.tsx](file:///d:/AD-creative-intelligence/src/pages/DashboardPage.tsx)
+  Relative Path: src/pages/DashboardPage.tsx
+  Main Responsibility: Executive overview; displays 4 primary KPIs, Top Creative Card, Recharts trends.
+  Imports: Card, PerformanceLineChart, EvidenceDonutChart, useAnalysis.
+
+- [src/pages/ResultsPage.tsx](file:///d:/AD-creative-intelligence/src/pages/ResultsPage.tsx)
+  Relative Path: src/pages/ResultsPage.tsx
+  Main Responsibility: Main results hub. Features pipeline reconciliation diagnostics bar, dual export buttons,
+  segmented tabs switching between "Creative Assets (150)" grid and "Ranked Findings (24)" cards.
+  Imports: FindingCard, exportCsv, useAnalysis, Button, Badge.
+
+- [src/pages/FindingDetailPage.tsx](file:///d:/AD-creative-intelligence/src/pages/FindingDetailPage.tsx)
+  Relative Path: src/pages/FindingDetailPage.tsx
+  Main Responsibility: Deep-dive view for a single finding; displays 95% CI bounds, Group Comparison Bar Chart,
+  sample representative creative images, methodology description, and observational limitations.
+  Imports: GroupComparisonBarChart, Badge, Card, useAnalysis.
+
+- [src/pages/SettingsPage.tsx](file:///d:/AD-creative-intelligence/src/pages/SettingsPage.tsx)
+  Relative Path: src/pages/SettingsPage.tsx
+  Main Responsibility: Configures attribution windows, statistical confidence levels (90%, 95%, 99%), and theme settings.
+
+
+================================================================================
+4. JUDGE QUESTIONS: EXACT FILE PATHS (FEATURES A THROUGH AI)
+================================================================================
+
+FEATURE: A. Application Startup
+FILE: index.html
+FUNCTION: N/A (HTML Document Host)
+LINE: 1-22 (Mount point at line 14: <div id="root">; script entry at line 20)
+CALLED FROM: Browser initial page load
+INPUT: HTTP request to root URL
+PROCESS: Loads HTML shell, pulls CSS styles and invokes Vite entry module src/main.tsx.
+OUTPUT: Mounted DOM tree containing the React application root.
+DEPENDENCIES: Vite development server / production HTML bundle.
+DEMO TIP: Open index.html and point to line 14 & 20 to show how Vite boots the React SPA.
+
+--------------------------------------------------------------------------------
+FEATURE: B. Main React Application
+FILE: src/main.tsx & src/app/App.tsx
+FUNCTION: ReactDOM.createRoot().render() & App()
+LINE: src/main.tsx:6-10; src/app/App.tsx:6-12
+CALLED FROM: index.html:20
+INPUT: Root DOM container (#root)
+PROCESS: Instantiates React 18 Concurrent Root, wraps RouterProvider with AnalysisProvider.
+OUTPUT: Rendered App component tree with global context and routing.
+DEPENDENCIES: react (v18.3.1), react-dom (v18.3.1), react-router-dom (v6.28.0).
+DEMO TIP: Open App.tsx:8 to demonstrate that AnalysisProvider wraps the entire application.
+
+--------------------------------------------------------------------------------
+FEATURE: C. Dashboard and Navigation
+FILE: src/app/router.tsx & src/pages/DashboardPage.tsx
+FUNCTION: createBrowserRouter() & DashboardPage()
+LINE: router.tsx:10-45; DashboardPage.tsx:21-304
+CALLED FROM: src/app/App.tsx:9
+INPUT: URL path history state
+PROCESS: Matches routes (/dashboard, /analyze, /results), renders AppShell layout with Sidebar.
+OUTPUT: Dashboard layout rendering KPI summary cards, line chart, donut chart, and top creative.
+DEPENDENCIES: react-router-dom, recharts (v2.13.3).
+DEMO TIP: Open DashboardPage.tsx:26-40 to show how topCreative is computed dynamically from performance records.
+
+--------------------------------------------------------------------------------
+FEATURE: D. Image Upload Interface
+FILE: src/features/upload/FileUpload.tsx
+FUNCTION: FileUpload()
+LINE: 15-273 (File input at line 30, Drag & drop handler at line 57)
+CALLED FROM: src/pages/AnalyzePage.tsx:173
+INPUT: User drag-and-drop actions or file browser selections (multiple images)
+PROCESS: Listens to dragover/drop events, filters files by MIME type, passes File[] to parent.
+OUTPUT: Array of HTML5 File objects delivered to AnalyzePage state.
+DEPENDENCIES: lucide-react (icons).
+DEMO TIP: Open FileUpload.tsx:30-43 to show how multi-image uploads are captured into File arrays.
+
+--------------------------------------------------------------------------------
+FEATURE: E. Backend Image Upload Endpoint
+FILE: NOT IMPLEMENTED (Client-Side Architecture by Design)
+FUNCTION: NOT IMPLEMENTED
+LINE: N/A
+CALLED FROM: N/A
+INPUT: N/A
+PROCESS: By architectural design, the application processes images 100% client-side in the browser.
+No backend server endpoint exists because images are never uploaded to a remote server.
+OUTPUT: Local in-browser Object URLs (blob:http://...).
+DEPENDENCIES: HTML5 File API and URL.createObjectURL.
+DEMO TIP: Explain to judges: "Our architecture is 100% client-side to guarantee complete advertiser
+privacy and zero cloud hosting costs. Images never leave the user's browser."
+
+--------------------------------------------------------------------------------
+FEATURE: F. Image File Validation
+FILE: src/features/upload/FileUpload.tsx & src/services/analysis/featureExtraction.ts
+FUNCTION: handleImageChange() & extractImageFeatures()
+LINE: FileUpload.tsx:33-40; featureExtraction.ts:217-220
+CALLED FROM: File input change / drop event
+INPUT: Uploaded File objects
+PROCESS: Validates MIME type against ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'].
+During canvas decode, img.onerror catches corrupted or unreadable image binaries.
+OUTPUT: Filtered File[] or user-visible error banner ("Some files were ignored...").
+DEPENDENCIES: HTML5 File API.
+DEMO TIP: Open FileUpload.tsx:33-35 to show MIME type validation.
+
+--------------------------------------------------------------------------------
+FEATURE: G. Image Storage
+FILE: src/pages/AnalyzePage.tsx & public/creatives/
+FUNCTION: URL.createObjectURL()
+LINE: src/pages/AnalyzePage.tsx:129-134
+CALLED FROM: AnalyzePage.tsx:handleRunAnalysis
+INPUT: Uploaded image File objects
+PROCESS: Creates ephemeral browser blob URLs (blob:http://localhost:5173/...) stored in
+item.creative.imageUrl. For benchmark demo mode, static PNG files in public/creatives/ad_001.png
+through ad_150.png are served locally.
+OUTPUT: Accessible image URL strings for <img> rendering.
+DEPENDENCIES: Browser memory, Vite public asset server.
+DEMO TIP: Open AnalyzePage.tsx:132 to show how blob URLs are created locally without remote cloud storage.
+
+--------------------------------------------------------------------------------
+FEATURE: H. Image Extraction and Decoding
+FILE: src/services/analysis/featureExtraction.ts
+FUNCTION: extractImageFeatures()
+LINE: 54-224
+CALLED FROM: featureExtraction.ts:568 (processBatchImageFeatures)
+INPUT: HTML5 File object
+PROCESS: Creates an off-screen HTML5 <canvas> (32x32 pixels), loads image via new Image(),
+draws image into context via ctx.drawImage(img, 0, 0, 32, 32), and extracts 4,096 raw RGBA bytes
+via ctx.getImageData(0, 0, 32, 32).data.
+OUTPUT: Extracted ImageExtractionResult containing dimensions, aspect ratio, brightness, contrast,
+saturation, palette, and complexity.
+DEPENDENCIES: HTML5 Canvas 2D API.
+DEMO TIP: Open featureExtraction.ts:95-102 to show the exact canvas instantiation and pixel extraction.
+
+--------------------------------------------------------------------------------
+FEATURE: I. Visual Feature and Attribute Extraction
+FILE: src/services/analysis/featureExtraction.ts
+FUNCTION: extractImageFeatures() & buildCreativeRecord()
+LINE: 105-194 & 229-340
+CALLED FROM: featureExtraction.ts:584
+INPUT: Pixel buffer (Uint8ClampedArray)
+PROCESS: Iterates through 1,024 pixels, calculates perceptual luminance, standard deviation,
+HSV saturation, hue spectrum buckets, and spatial edge transitions. Packages findings into
+CreativeAttribute objects with explicit provenance ('heuristic' vs 'imported').
+OUTPUT: Populated Creative object with typed attributes.
+DEPENDENCIES: Pure JavaScript math.
+DEMO TIP: Open featureExtraction.ts:125-140 to show luminance and HSV conversion algorithms.
+
+--------------------------------------------------------------------------------
+FEATURE: J. Color Palette Detection
+FILE: src/services/analysis/featureExtraction.ts
+FUNCTION: extractImageFeatures()
+LINE: 142-161, 164-167, 180-188
+CALLED FROM: featureExtraction.ts:54
+INPUT: RGB pixel values
+PROCESS: Converts RGB to HSV hue angle (0-360 degrees). Accumulates pixel counts into Warm (0-65 deg,
+330-360 deg), Natural (65-165 deg), and Cool (165-330 deg). If saturation < 30, classifies as
+'Neutral / Monochrome'. Otherwise classifies into dominant bucket ('Cool (Blue/Cyan)',
+'Warm (Orange/Red/Brown)', or 'Natural (Green/Olive)').
+OUTPUT: Palette string and dominant color HEX code (e.g. '#7C3AED').
+DEPENDENCIES: Standard colorimetry formulas.
+DEMO TIP: Open featureExtraction.ts:180-188 to show the exact palette classification logic.
+
+--------------------------------------------------------------------------------
+FEATURE: K. Color Saturation and Brightness Calculations
+FILE: src/services/analysis/featureExtraction.ts
+FUNCTION: extractImageFeatures()
+LINE: 125-128, 136-140, 169-178
+CALLED FROM: featureExtraction.ts:54
+INPUT: RGB pixel values
+PROCESS:
+1. Brightness: Perceptual luminance via ITU-R Rec. 601: luma = 0.299*R + 0.587*G + 0.114*B.
+   Average luma >= 145 -> 'High Brightness', else 'Muted Brightness'.
+2. Contrast: Population standard deviation of luminance across pixels:
+   variance = sumLumaSq/N - meanLuma^2; contrast = sqrt(variance).
+   Contrast >= 30 -> 'High Contrast', else 'Low Contrast'.
+3. Saturation: HSV saturation = (max(R,G,B) - min(R,G,B)) / max(R,G,B) * 255.
+   Average saturation >= 90 -> 'Vibrant Saturation', else 'Muted Saturation'.
+OUTPUT: brightnessVal, contrastVal, saturationVal and categorical labels.
+DEPENDENCIES: Rec. 601 perceptual color formula.
+DEMO TIP: Open featureExtraction.ts:172-175 to show the standard deviation contrast formula.
+
+--------------------------------------------------------------------------------
+FEATURE: L. Composition Analysis
+FILE: src/services/analysis/featureExtraction.ts
+FUNCTION: categorizeAspectRatio() & extractImageFeatures()
+LINE: 41-47 & 130-133, 190-192
+CALLED FROM: featureExtraction.ts:82, 191
+INPUT: Image naturalWidth, naturalHeight, and pixel luminance values
+PROCESS:
+1. Ratio: width / height mapped to '1:1 Square', '9:16 Vertical Story', '4:5 Feed Portrait',
+   or '16:9 Landscape'.
+2. Complexity: Computes adjacent pixel luminance differential |luma - prevLuma|.
+   If average edge delta >= 18 -> 'Detailed / Text-Heavy', else 'Clean / Minimalist'.
+OUTPUT: aspectRatioLabel and complexityLabel.
+DEPENDENCIES: Client-side mathematical heuristics.
+DEMO TIP: Open featureExtraction.ts:41-47 for aspect ratio and 190-193 for edge complexity.
+
+--------------------------------------------------------------------------------
+FEATURE: M. Text, CTA, and Visual Element Detection
+FILE: src/services/analysis/featureExtraction.ts
+FUNCTION: extractImageFeatures() & buildCreativeRecord()
+LINE: 190-192 & 306-322
+CALLED FROM: featureExtraction.ts:568, 584
+INPUT: Edge differential and CSV imported metadata columns
+PROCESS: Edge density heuristic estimates text/visual clutter. In addition, campaign CSV metadata
+(such as 'call_to_action', 'offer_type', 'headline') is automatically ingested and attached as
+provenance-tagged attributes ('imported'). Note: External cloud OCR APIs are omitted to maintain
+100% offline client-side execution.
+OUTPUT: 'Detailed / Text-Heavy' vs 'Clean / Minimalist' attribute, plus imported copy tags.
+DEPENDENCIES: HTML5 Canvas heuristics + CSV metadata ingestion.
+DEMO TIP: Open featureExtraction.ts:306-322 to show how imported text/CTA attributes from CSV are retained.
+
+--------------------------------------------------------------------------------
+FEATURE: N. CSV Upload Interface
+FILE: src/features/upload/FileUpload.tsx & src/pages/AnalyzePage.tsx
+FUNCTION: handleCsvChange() & handleFilesSelected()
+LINE: FileUpload.tsx:45-55; AnalyzePage.tsx:62-98
+CALLED FROM: User CSV selection in UI
+INPUT: CSV File object (.csv)
+PROCESS: Reads file input, confirms .csv extension, and initiates PapaParse execution.
+OUTPUT: Selected CSV file object passed to AnalyzePage state.
+DEPENDENCIES: lucide-react.
+DEMO TIP: Open AnalyzePage.tsx:62-90 to show how selecting a CSV immediately triggers parsing.
+
+--------------------------------------------------------------------------------
+FEATURE: O. CSV Parsing and Validation
+FILE: src/services/csv/parseCsv.ts & src/services/csv/validateCsv.ts
+FUNCTION: parseCsvFile() & validateAndNormalizeCsv()
+LINE: parseCsv.ts:50-80; validateCsv.ts:27-240
+CALLED FROM: AnalyzePage.tsx:69, 87
+INPUT: Raw CSV File object and active ColumnMapping
+PROCESS: PapaParse parses file with header:true and skipEmptyLines:'greedy'.
+validateAndNormalizeCsv checks for required IDs, non-negative impressions/clicks, strips currency
+symbols ($), checks logic rules (clicks <= impressions), and records ValidationIssues.
+OUTPUT: CsvValidationResult with typed PerformanceRecord[] and issue diagnostics.
+DEPENDENCIES: papaparse (v5.4.1).
+DEMO TIP: Open validateCsv.ts:74-129 to show numeric cleaning and data hygiene rules.
+
+--------------------------------------------------------------------------------
+FEATURE: P. CSV Column Mapping
+FILE: src/services/csv/columnMapping.ts & src/features/validation/ColumnMapper.tsx
+FUNCTION: autoDetectColumnMapping() & validateColumnMapping()
+LINE: columnMapping.ts:32-61, 66-82; ColumnMapper.tsx:13-104
+CALLED FROM: AnalyzePage.tsx:75, 101
+INPUT: Array of header string names from uploaded CSV
+PROCESS: Runs regex patterns against headers (e.g. /creative_id|ad_id/i, /impressions|imps/i).
+Maps matches to canonical schema. ColumnMapper renders dropdowns allowing manual remapping.
+OUTPUT: ColumnMapping object.
+DEPENDENCIES: Regular expression heuristics.
+DEMO TIP: Open columnMapping.ts:16-27 to show the regex patterns used for auto-detection.
+
+--------------------------------------------------------------------------------
+FEATURE: Q. Image-to-CSV Matching
+FILE: src/services/analysis/featureExtraction.ts
+FUNCTION: normalizeIdentifier() & reconcileCreativesAndImages()
+LINE: 29-36 & 355-537
+CALLED FROM: src/pages/AnalyzePage.tsx:117
+INPUT: Uploaded File[] and parsed PerformanceRecord[]
+PROCESS: Bidirectional reconciliation:
+1. Normalizes filenames and IDs via normalizeIdentifier() (stripping extensions, spaces, symbols).
+2. Performs 4-pass match: exact filename -> exact ID -> normalized ID -> substring token match.
+3. Sets matchStatus ('matched', 'unmatched', 'image_missing').
+4. Collects complete ProcessingDiagnostics with zero dropped records.
+OUTPUT: Reconciled items array ({creative, imageFile, performanceRecord}) and diagnostics.
+DEPENDENCIES: Pure TypeScript string matching.
+DEMO TIP: Open featureExtraction.ts:394-416 to show the multi-pass resilient matching algorithm.
+
+--------------------------------------------------------------------------------
+FEATURE: R. CTR Calculation
+FILE: src/services/metrics/calculateMetrics.ts
+FUNCTION: calculateCtr()
+LINE: 7-15
+CALLED FROM: calculateMetrics.ts:88, 153; exportCsv.ts:69
+INPUT: clicks (number), impressions (number)
+PROCESS: Checks if inputs are null/undefined, ensures impressions > 0 and clicks >= 0.
+Computes: clicks / impressions.
+OUTPUT: Ratio (number) or null if invalid denominator.
+DEPENDENCIES: Pure JavaScript.
+DEMO TIP: Open calculateMetrics.ts:7-15 to show the boundary checks and division logic.
+
+--------------------------------------------------------------------------------
+FEATURE: S. CVR Calculation
+FILE: src/services/metrics/calculateMetrics.ts
+FUNCTION: calculateCvr()
+LINE: 21-29
+CALLED FROM: calculateMetrics.ts:90, 154; exportCsv.ts:74
+INPUT: conversions (number), clicks (number)
+PROCESS: Checks null/undefined, ensures clicks > 0 and conversions >= 0.
+Computes: conversions / clicks.
+OUTPUT: Ratio (number) or null if invalid denominator.
+DEPENDENCIES: Pure JavaScript.
+DEMO TIP: Open calculateMetrics.ts:21-29 to show safe conversion rate calculation.
+
+--------------------------------------------------------------------------------
+FEATURE: T. CPA Calculation
+FILE: src/services/metrics/calculateMetrics.ts
+FUNCTION: calculateCpa()
+LINE: 49-57
+CALLED FROM: calculateMetrics.ts:94, 156; exportCsv.ts:84
+INPUT: spend (number), conversions (number)
+PROCESS: Checks null/undefined, ensures conversions > 0 and spend >= 0.
+Computes: spend / conversions.
+OUTPUT: Ratio in dollars per acquisition (number) or null.
+DEPENDENCIES: Pure JavaScript.
+DEMO TIP: Open calculateMetrics.ts:49-57 to show CPA handling.
+
+--------------------------------------------------------------------------------
+FEATURE: U. ROAS Calculation
+FILE: src/services/metrics/calculateMetrics.ts
+FUNCTION: calculateRoas()
+LINE: 63-71
+CALLED FROM: calculateMetrics.ts:96, 157; exportCsv.ts:89
+INPUT: revenue (number), spend (number)
+PROCESS: Checks null/undefined, ensures spend > 0 and revenue >= 0.
+Computes: revenue / spend.
+OUTPUT: Return multiplier (number) or null.
+DEPENDENCIES: Pure JavaScript.
+DEMO TIP: Open calculateMetrics.ts:63-71 to show ROAS handling.
+
+--------------------------------------------------------------------------------
+FEATURE: V. Statistical Comparison Methods
+FILE: src/services/analysis/statisticalTests.ts
+FUNCTION: compareProportions() & compareMeans()
+LINE: 28-110 & 116-181
+CALLED FROM: src/services/analysis/evidenceClassifier.ts:201, 251
+INPUT: Group A & Group B metrics (counts, numerators, denominators or continuous arrays)
+PROCESS:
+1. compareProportions: Computes pooled/unpooled standard error se = sqrt(p1*(1-p1)/nA + p2*(1-p2)/nB),
+   z-score = diff / se, two-tailed p-value via normalCdf(|z|), and 95% Wald CI.
+2. compareMeans: Welch's two-sample t-test computing sample variances varA/(nA) + varB/(nB),
+   standard error, and 95% CI for continuous metrics like CPA and ROAS.
+OUTPUT: ComparisonResult object ({effectSize, confidenceInterval, sampleSize, zScore, pValue, isUnderpowered}).
+DEPENDENCIES: Abramowitz & Stegun normal approximation formula.
+DEMO TIP: Open statisticalTests.ts:74-98 to show exact standard error and z-score calculations.
+
+--------------------------------------------------------------------------------
+FEATURE: W. Effect-Size Calculation
+FILE: src/services/analysis/statisticalTests.ts & src/services/metrics/formatters.ts
+FUNCTION: compareProportions() & formatEffectSize()
+LINE: statisticalTests.ts:71, 144; formatters.ts:39-50
+CALLED FROM: evidenceClassifier.ts:199, 249; FindingCard.tsx:43
+INPUT: Group B rate/mean and Group A rate/mean
+PROCESS: Computes diff = rateB - rateA. Formats with sign (+/-) as percentage points (+0.4%)
+for CTR/CVR, dollar amount (-$4.20) for CPA, or multiplier (+0.65x) for ROAS.
+OUTPUT: Number delta and formatted string.
+DEPENDENCIES: Pure JavaScript math.
+DEMO TIP: Open formatters.ts:39-50 to show metric-aware effect size formatting.
+
+--------------------------------------------------------------------------------
+FEATURE: X. Confidence-Interval Calculation
+FILE: src/services/analysis/statisticalTests.ts & src/services/metrics/formatters.ts
+FUNCTION: compareProportions(), compareMeans() & formatConfidenceInterval()
+LINE: statisticalTests.ts:90-93, 165-166; formatters.ts:52-66
+CALLED FROM: evidenceClassifier.ts:208, 252; FindingCard.tsx:49
+INPUT: Effect size difference (diff) and standard error (se)
+PROCESS: Margin of error = 1.96 * se (for 95% confidence level).
+Computes CI: [diff - 1.96 * se, diff + 1.96 * se].
+OUTPUT: Tuple [number, number] and formatted string (e.g. "[+0.1%, +0.8%]").
+DEPENDENCIES: Normal distribution critical value z = 1.96.
+DEMO TIP: Open statisticalTests.ts:90-93 to show the 95% critical value and interval bounds.
+
+--------------------------------------------------------------------------------
+FEATURE: Y. Sample-Size Calculation
+FILE: src/services/analysis/statisticalTests.ts & src/services/analysis/evidenceClassifier.ts
+FUNCTION: compareProportions(), compareMeans() & generateFindings()
+LINE: statisticalTests.ts:55, 126; evidenceClassifier.ts:212-213, 255-256
+CALLED FROM: evidenceClassifier.ts
+INPUT: Group creative counts and total sample size
+PROCESS: Enforces statistical power thresholds:
+If sampleSize < 20 or groupA.count < 10 or groupB.count < 10, marks finding status as 'underpowered'
+and withholds definitive causal assertions.
+OUTPUT: sampleSize (number) and isUnderpowered flag.
+DEPENDENCIES: Statistical power criteria.
+DEMO TIP: Open evidenceClassifier.ts:212-213 to show the sample size guardrails that prevent spurious findings.
+
+--------------------------------------------------------------------------------
+FEATURE: Z. Attribute-Based Ranking
+FILE: src/services/analysis/evidenceClassifier.ts
+FUNCTION: generateFindings()
+LINE: 158-343 (Sorting logic at lines 330-341)
+CALLED FROM: src/context/AnalysisContext.tsx:128, 211
+INPUT: Creative[] and PerformanceRecord[]
+PROCESS: Generates findings across all attribute-metric pairs, then sorts them:
+1. Status priority: 'supported' (rank 0) -> 'inconclusive' (rank 1) -> 'underpowered' (rank 2).
+2. Within the same status, sorts descending by absolute effect size |diff|.
+OUTPUT: Sorted array of Finding objects.
+DEPENDENCIES: Array.prototype.sort.
+DEMO TIP: Open evidenceClassifier.ts:330-341 to show the dual-criterion sorting algorithm.
+
+--------------------------------------------------------------------------------
+FEATURE: AA. Inconclusive-Result Handling
+FILE: src/services/analysis/evidenceClassifier.ts
+FUNCTION: generateFindings()
+LINE: 214-220, 257-263
+CALLED FROM: evidenceClassifier.ts
+INPUT: Confidence interval bounds [low, high]
+PROCESS: If the 95% CI spans zero (i.e. low < 0 and high > 0), the effect is statistically indistinguishable
+from zero and marked as 'inconclusive'. The UI applies a neutral/amber badge and displays observational
+limitations ("Correlation across observational data; does not establish verified causality").
+OUTPUT: status: 'inconclusive' on Finding object.
+DEPENDENCIES: Inferential hypothesis testing rules.
+DEMO TIP: Open evidenceClassifier.ts:214-220 to show how spanning zero triggers 'inconclusive'.
+
+--------------------------------------------------------------------------------
+FEATURE: AB. API Endpoints and Frontend/Backend Communication
+FILE: NOT IMPLEMENTED (Client-Side Architecture by Design)
+FUNCTION: NOT IMPLEMENTED
+LINE: N/A
+CALLED FROM: N/A
+INPUT: N/A
+PROCESS: By design, there are no REST or GraphQL API endpoints. The app runs completely within
+the browser runtime using Web APIs (FileReader, Canvas, Blob).
+OUTPUT: Zero network latency and zero external data transmission.
+DEPENDENCIES: Native Web APIs.
+DEMO TIP: Highlight client-side execution as an enterprise security and data privacy feature.
+
+--------------------------------------------------------------------------------
+FEATURE: AC. Database Operations
+FILE: NOT IMPLEMENTED (Client-Side In-Memory & Static Asset Architecture)
+FUNCTION: NOT IMPLEMENTED
+LINE: N/A
+CALLED FROM: N/A
+INPUT: N/A
+PROCESS: There is no PostgreSQL, SQLite, or MongoDB database. Session state is preserved in React
+state/context (AnalysisContext.tsx), while the benchmark dataset is stored as embedded JSON (realDataset.json).
+OUTPUT: Instant access without database migrations or connection pooling.
+DEPENDENCIES: React Context & TypeScript memory model.
+DEMO TIP: Explain that client-side state eliminates server setup requirements for judges.
+
+--------------------------------------------------------------------------------
+FEATURE: AD. Progress Tracking and Error Reporting
+FILE: src/services/analysis/featureExtraction.ts & src/pages/AnalyzePage.tsx
+FUNCTION: processBatchImageFeatures() & handleRunAnalysis()
+LINE: featureExtraction.ts:544-614; AnalyzePage.tsx:123-128
+CALLED FROM: AnalyzePage.tsx:125
+INPUT: Progress callback onProgress?: (processed, total) => void
+PROCESS: Processes image batches with concurrency limit (10 items/chunk). Reports real-time
+progress updates to the UI ("Extracting visual features: 40 of 150 assets processed...").
+Individual image failures are caught and recorded in diagnostics.errors without failing the batch.
+OUTPUT: Continuous progress updates and populated ProcessingDiagnostics.
+DEPENDENCIES: Promise.all chunking.
+DEMO TIP: Open featureExtraction.ts:555-614 to show how batch concurrency protects browser memory.
+
+--------------------------------------------------------------------------------
+FEATURE: AE. CSV/XLSX Report Generation
+FILE: src/services/export/exportCsv.ts
+FUNCTION: exportImageLevelCsv() & exportFindingsToCsv()
+LINE: 15-119 & 126-164
+CALLED FROM: src/pages/ResultsPage.tsx:71, 79
+INPUT: Creatives[], PerformanceRecord[], and Finding[]
+PROCESS:
+1. exportImageLevelCsv: Generates 22-column CSV containing all 150 creative assets with extracted
+   attributes, metrics (CTR, CVR, CPC, CPA, ROAS), match statuses, and errors.
+2. exportFindingsToCsv: Generates 14-column CSV with 24 ranked findings, effect sizes, CIs, and limitations.
+Properly escapes quotes via escapeCsvCell().
+OUTPUT: Formatted CSV string.
+DEPENDENCIES: Pure TypeScript string formatting.
+DEMO TIP: Open exportCsv.ts:15-42 to show the 22 columns generated for the 150-creative export.
+
+--------------------------------------------------------------------------------
+FEATURE: AF. Download Functionality
+FILE: src/services/export/exportCsv.ts
+FUNCTION: downloadCsvFile()
+LINE: 169-180
+CALLED FROM: src/pages/ResultsPage.tsx:74, 82
+INPUT: filename (string), csvContent (string)
+PROCESS: Creates a Blob with type 'text/csv;charset=utf-8;', generates a temporary Object URL,
+creates a hidden <a> element with download attribute, triggers click(), and revokes URL.
+OUTPUT: Native browser file download dialog.
+DEPENDENCIES: Blob, URL.createObjectURL, URL.revokeObjectURL.
+DEMO TIP: Open exportCsv.ts:169-180 to show the in-memory download mechanism.
+
+--------------------------------------------------------------------------------
+FEATURE: AG. Configuration and Environment Variables
+FILE: vite.config.ts, tsconfig.json, tailwind.config.js, .env.example
+FUNCTION: Configuration exports
+LINE: vite.config.ts:1-13; tailwind.config.js:1-40; tsconfig.json:1-25
+CALLED FROM: Vite CLI / TypeScript compiler
+INPUT: Build flags and config options
+PROCESS: Configures React plugin, test runner (vitest), CSS processor, strict type checking.
+No mandatory secret API keys are required because all processing is local.
+OUTPUT: Development server and compiled static production bundle.
+DEPENDENCIES: vite, vitest, tailwindcss.
+DEMO TIP: Open vite.config.ts to show the Vitest configuration embedded directly in Vite.
+
+--------------------------------------------------------------------------------
+FEATURE: AH. Testing and Validation
+FILE: tests/ (7 test files, 38 passing tests)
+FUNCTION: describe(), it(), expect()
+LINE: tests/unit/pipeline-reconciliation.test.ts:1-261; tests/unit/metrics.test.ts:1-150
+CALLED FROM: npm run test (vitest run)
+INPUT: Mock files, real dataset, synthetic edge cases
+PROCESS: Executes 38 automated unit and integration tests covering metric formulas, CSV validation,
+normalization, bidirectional matching, <24 images edge cases, and report exports.
+OUTPUT: All 38 tests passing (100% green).
+DEPENDENCIES: vitest (v2.1.8), @testing-library/react.
+DEMO TIP: Run "npm run test" in terminal to show the judges all 38 tests passing cleanly in ~2 seconds.
+
+--------------------------------------------------------------------------------
+FEATURE: AI. Main Execution or Processing Pipeline
+FILE: src/pages/AnalyzePage.tsx
+FUNCTION: handleRunAnalysis()
+LINE: 108-153
+CALLED FROM: "Run Analysis" button click in UI
+INPUT: selectedImages (File[]), validationResult.records (PerformanceRecord[]), columnMapping
+PROCESS: Orchestrates the 4-phase pipeline:
+Phase 1: reconcileCreativesAndImages() matches images to CSV records.
+Phase 2: processBatchImageFeatures() extracts canvas visual heuristics in chunks of 10.
+Phase 3: Creates local Object URLs for browser image display.
+Phase 4: setUploadedDataset() calculates true aggregates and generates statistical findings.
+Navigates to /results.
+OUTPUT: Fully populated AnalysisContext state and transition to Results view.
+DEPENDENCIES: featureExtraction.ts, AnalysisContext.tsx.
+DEMO TIP: Open AnalyzePage.tsx:108-153 and walk judges through Phase 1 to Phase 4 step-by-step.
+
+
+================================================================================
+5. END-TO-END SYSTEM EXECUTION FLOW & DATA MOVEMENT
+================================================================================
+
+5.1 ARCHITECTURAL FLOW DIAGRAM
+
++------------------------------------------------------------------------------+
+| 1. USER INGESTION (Browser UI)                                               |
+|    User drops 150 Creative Images (PNG/JPG) + 1 Performance CSV              |
+|    File: src/features/upload/FileUpload.tsx (Lines 30-80)                    |
++------------------------------------------------------------------------------+
+                                     |
+                                     v
++------------------------------------------------------------------------------+
+| 2. CSV PARSING & SCHEMA AUTO-DETECTION                                       |
+|    PapaParse streams CSV rows -> Regex maps columns (ID, Imps, Clicks, Spend) |
+|    Files: src/services/csv/parseCsv.ts (Lines 50-80)                         |
+|           src/services/csv/columnMapping.ts (Lines 32-61)                    |
++------------------------------------------------------------------------------+
+                                     |
+                                     v
++------------------------------------------------------------------------------+
+| 3. DATA HYGIENE VALIDATION & NORMALIZATION                                   |
+|    Validates numeric types, strips currency symbols, flags attribution errors|
+|    File: src/services/csv/validateCsv.ts (Lines 27-240)                      |
++------------------------------------------------------------------------------+
+                                     |
+                                     v
++------------------------------------------------------------------------------+
+| 4. BIDIRECTIONAL RECONCILIATION                                              |
+|    Matches 150 images to CSV records via normalizeIdentifier ('ad_001'->'ad001')|
+|    Produces zero silent drops; generates auditable ProcessingDiagnostics     |
+|    File: src/services/analysis/featureExtraction.ts (Lines 355-537)          |
++------------------------------------------------------------------------------+
+                                     |
+                                     v
++------------------------------------------------------------------------------+
+| 5. BATCH COMPUTER VISION FEATURE EXTRACTION                                  |
+|    Processes images in chunks of 10 on offscreen HTML5 <canvas> (32x32)     |
+|    Extracts: Luma, Contrast stddev, HSV Saturation, Hue Palette, Complexity  |
+|    File: src/services/analysis/featureExtraction.ts (Lines 54-224, 544-614)  |
++------------------------------------------------------------------------------+
+                                     |
+                                     v
++------------------------------------------------------------------------------+
+| 6. TRUE METRIC AGGREGATION & STATISTICAL TESTING                             |
+|    Computes True Aggregates (sum(clicks)/sum(impressions))                   |
+|    Runs two-proportion Wald tests & Welch's t-tests with 95% CI              |
+|    Files: src/services/metrics/calculateMetrics.ts (Lines 106-159)           |
+|           src/services/analysis/statisticalTests.ts (Lines 28-181)           |
++------------------------------------------------------------------------------+
+                                     |
+                                     v
++------------------------------------------------------------------------------+
+| 7. EVIDENCE CLASSIFICATION & ATTRIBUTE RANKING                               |
+|    Classifies into 'supported', 'inconclusive', 'underpowered'               |
+|    Ranks by statistical significance & absolute effect size                  |
+|    File: src/services/analysis/evidenceClassifier.ts (Lines 158-343)         |
++------------------------------------------------------------------------------+
+                                     |
+                                     v
++------------------------------------------------------------------------------+
+| 8. DUAL-VIEW PRESENTATION & REPORT EXPORT                                    |
+|    - View 1: 150 Creative Assets Grid (Asset-level visual & financial audit)  |
+|    - View 2: 24 Ranked Aggregate Findings (Statistical insight cards)        |
+|    - Export A: 150-Row Creative-Level CSV                                    |
+|    - Export B: 24-Row Aggregate Findings CSV                                 |
+|    Files: src/pages/ResultsPage.tsx (Lines 50-200)                           |
+|           src/services/export/exportCsv.ts (Lines 15-180)                    |
++------------------------------------------------------------------------------+
+
+5.2 EXECUTION BOUNDARY SUMMARY
+- IN BROWSER (100%): All steps (1 through 8) execute completely in the local browser.
+- ON BACKEND SERVER (0%): No remote backend server or database is involved.
+- EXTERNAL APIS (0%): No third-party network requests are made during analysis.
+
+
+================================================================================
+6. TECHNICAL STACK & LIBRARIES ANALYSIS
+================================================================================
+
+TECHNOLOGY: React (v18.3.1) & React-DOM (v18.3.1)
+WHERE USED: src/main.tsx, src/app/App.tsx, and all src/components, src/pages
+PURPOSE: Core component-based UI view framework.
+WHY NEEDED: Enables declarative state-driven rendering, Concurrent Mode, and component reusability.
+ESSENTIAL OR REPLACEABLE: Essential; foundational frontend framework.
+
+TECHNOLOGY: Vite (v6.0.1) & @vitejs/plugin-react (v4.3.4)
+WHERE USED: vite.config.ts, package.json
+PURPOSE: Lightning-fast build tool and development server.
+WHY NEEDED: Hot Module Replacement (HMR) and optimized Rollup-based production bundling.
+ESSENTIAL OR REPLACEABLE: Essential for developer velocity and bundling.
+
+TECHNOLOGY: TypeScript (v5.6.3)
+WHERE USED: tsconfig.json, across entire codebase (.ts and .tsx files)
+PURPOSE: Static type safety, strict interface contracts, compile-time error detection.
+WHY NEEDED: Guarantees that metrics, coordinates, and data schemas have zero runtime type mismatches.
+ESSENTIAL OR REPLACEABLE: Essential for data science code integrity.
+
+TECHNOLOGY: React Router v6 (v6.28.0)
+WHERE USED: src/app/router.tsx, src/components/layout/AppShell.tsx, all pages
+PURPOSE: Client-side routing and deep-linking (/analyze, /dashboard, /results, /results/:id).
+WHY NEEDED: Provides instant multi-page navigation without page refreshes.
+ESSENTIAL OR REPLACEABLE: Essential for SPA navigation.
+
+TECHNOLOGY: PapaParse (v5.4.1)
+WHERE USED: src/services/csv/parseCsv.ts
+PURPOSE: Robust client-side CSV parsing.
+WHY NEEDED: Correctly handles quoted strings, commas inside cells, custom line endings, and file streams.
+ESSENTIAL OR REPLACEABLE: Replaceable in theory, but industry standard for browser CSV parsing.
+
+TECHNOLOGY: Recharts (v2.13.3)
+WHERE USED: src/components/charts/
+PURPOSE: SVG-based declarative data visualization.
+WHY NEEDED: Renders interactive performance trend line charts, donut charts, and group comparison bar charts.
+ESSENTIAL OR REPLACEABLE: Replaceable with Chart.js or D3, but Recharts provides native React integration.
+
+TECHNOLOGY: Lucide React (v1.16.0)
+WHERE USED: Across all UI components, buttons, and badges
+PURPOSE: Clean, consistent modern iconography.
+WHY NEEDED: Visually indicates actions (upload, download, filters, status indicators).
+ESSENTIAL OR REPLACEABLE: Aesthetic utility; replaceable with any icon set.
+
+TECHNOLOGY: Tailwind CSS (v3.4.16) & PostCSS (v8.4.49)
+WHERE USED: tailwind.config.js, src/styles/index.css, all components
+PURPOSE: Utility-first CSS styling framework.
+WHY NEEDED: Enables rapid styling with customized design tokens (brand-700, lavender-50, status colors).
+ESSENTIAL OR REPLACEABLE: Essential for the existing UI layout and theme consistency.
+
+TECHNOLOGY: Vitest (v2.1.8) & Testing Library (React v16.1.0, Jest-DOM v6.6.3)
+WHERE USED: tests/
+PURPOSE: Automated unit and integration testing runner.
+WHY NEEDED: Validates mathematical formulas, CSV sanitization, and reconciliation algorithms (38 automated tests).
+ESSENTIAL OR REPLACEABLE: Essential for test-driven code verification.
+
+TECHNOLOGY: HTML5 Canvas 2D API (Native Browser API)
+WHERE USED: src/services/analysis/featureExtraction.ts
+PURPOSE: In-memory image pixel sampling and visual heuristic feature extraction.
+WHY NEEDED: Allows client-side image decoding without backend Python OpenCV dependencies.
+ESSENTIAL OR REPLACEABLE: Essential for 100% client-side privacy architecture.
+
+
+================================================================================
+7. CORE FUNCTIONS & ALGORITHMS REFERENCE CATALOG
+================================================================================
+
+FUNCTION: normalizeIdentifier
+FILE: src/services/analysis/featureExtraction.ts:29-36
+PURPOSE: Normalizes creative IDs or filenames for resilient, case-insensitive comparison.
+PARAMETERS: val (string | null | undefined)
+RETURNS: string (normalized alphanumeric string)
+PROCESSING STEPS:
+1. Strips leading and trailing whitespace.
+2. Converts string to lowercase.
+3. Strips file extensions (e.g. .png, .jpg, .webp).
+4. Strips non-alphanumeric characters (underscores, hyphens, spaces).
+CALLED FROM: featureExtraction.ts:379, 386, 398, 410; tests/unit/pipeline-reconciliation.test.ts
+ERRORS / EDGE CASES: Returns empty string '' on null/undefined input without throwing.
+
+--------------------------------------------------------------------------------
+FUNCTION: extractImageFeatures
+FILE: src/services/analysis/featureExtraction.ts:54-224
+PURPOSE: Extracts dimensions, contrast, brightness, saturation, palette, and complexity from an image File.
+PARAMETERS: file (File)
+RETURNS: Promise<ImageExtractionResult>
+PROCESSING STEPS:
+1. Creates object URL for image file.
+2. Loads into HTML5 Image object.
+3. Resizes onto offscreen 32x32 Canvas.
+4. Samples 1,024 pixels for luminance, HSV saturation, hue angle, and edge differential.
+5. Derives standard deviation of luminance as visual contrast.
+6. Revokes object URL in finally block.
+CALLED FROM: featureExtraction.ts:568 (processBatchImageFeatures)
+ERRORS / EDGE CASES: Falls back gracefully if canvas read fails; rejects on corrupt image file with descriptive error.
+
+--------------------------------------------------------------------------------
+FUNCTION: reconcileCreativesAndImages
+FILE: src/services/analysis/featureExtraction.ts:355-537
+PURPOSE: Bidirectionally matches uploaded images and CSV performance records without dropping records.
+PARAMETERS: uploadedFiles (File[]), performanceRecords (PerformanceRecord[]), columnMapping? (ColumnMapping)
+RETURNS: { items: ReconciledCreativeItem[], diagnostics: ProcessingDiagnostics }
+PROCESSING STEPS:
+1. Indexes CSV performance records by exact filename, exact ID, and normalized identifier.
+2. Iterates through uploaded images; executes 4-pass match against indexed records.
+3. Tags each image item with matchStatus ('matched' or 'unmatched').
+4. Iterates remaining unmatched CSV records; creates 'image_missing' items.
+5. Populates complete ProcessingDiagnostics.
+CALLED FROM: src/pages/AnalyzePage.tsx:117; tests/unit/pipeline-reconciliation.test.ts
+ERRORS / EDGE CASES: Guarantees zero dropped records regardless of naming inconsistencies or missing images.
+
+--------------------------------------------------------------------------------
+FUNCTION: processBatchImageFeatures
+FILE: src/services/analysis/featureExtraction.ts:544-633
+PURPOSE: Concurrency-controlled batch processor for image attribute extraction.
+PARAMETERS: items (ReconciledCreativeItem[]), batchSize = 10, onProgress? callback
+RETURNS: Promise<ProcessingDiagnostics>
+PROCESSING STEPS:
+1. Slices reconciled items into chunks of batchSize (default 10).
+2. Executes Promise.all on chunk, calling extractImageFeatures for each item with an image file.
+3. Updates item.creative with extracted heuristics and status.
+4. Catches errors per-image without interrupting the rest of the batch.
+5. Invokes onProgress callback after every item.
+CALLED FROM: src/pages/AnalyzePage.tsx:125
+ERRORS / EDGE CASES: Isolated try-catch blocks ensure one corrupt image does not crash the 149 other images.
+
+--------------------------------------------------------------------------------
+FUNCTION: calculateAggregates
+FILE: src/services/metrics/calculateMetrics.ts:106-159
+PURPOSE: Aggregates a list of performance records using true sums of numerators and denominators.
+PARAMETERS: records (PerformanceRecord[]), uniqueCreativeCount? (number)
+RETURNS: AggregateMetrics
+PROCESSING STEPS:
+1. Accumulates totalImpressions, totalClicks, totalConversions, totalSpend, totalRevenue across all rows.
+2. Tracks unique creative count via Set.
+3. Computes aggregate CTR = totalClicks / totalImpressions.
+4. Computes aggregate CVR = totalConversions / totalClicks.
+5. Computes aggregate CPA = totalSpend / totalConversions.
+6. Computes aggregate ROAS = totalRevenue / totalSpend.
+CALLED FROM: src/context/AnalysisContext.tsx:138; src/data/realDataset.ts:138
+ERRORS / EDGE CASES: Handles null/zero denominators safely by returning null; does not average row-level ratios.
+
+--------------------------------------------------------------------------------
+FUNCTION: compareProportions
+FILE: src/services/analysis/statisticalTests.ts:28-110
+PURPOSE: Two-proportion z-test with 95% Wald confidence interval for binomial metrics (CTR, CVR).
+PARAMETERS: groupA, groupB (counts, numerators, denominators), groupALabel?, groupBLabel?
+RETURNS: ComparisonResult
+PROCESSING STEPS:
+1. Computes group rates p1 = numA / denA and p2 = numB / denB.
+2. Checks underpowered guardrails (count < 5 or denominator <= 0).
+3. Computes standard error se = sqrt( (p1*(1-p1)/nA) + (p2*(1-p2)/nB) ).
+4. Computes 95% CI = [diff - 1.96*se, diff + 1.96*se].
+5. Computes zScore = diff / se and pValue = 2 * (1 - normalCdf(|zScore|)).
+CALLED FROM: src/services/analysis/evidenceClassifier.ts:201
+ERRORS / EDGE CASES: If se is zero or sample size is inadequate, flags isUnderpowered = true and returns null CI.
+
+--------------------------------------------------------------------------------
+FUNCTION: compareMeans
+FILE: src/services/analysis/statisticalTests.ts:116-181
+PURPOSE: Welch's two-sample t-test with 95% CI for continuous metrics (CPA, ROAS, CPC).
+PARAMETERS: valuesA (number[]), valuesB (number[]), groupALabel?, groupBLabel?
+RETURNS: ComparisonResult
+PROCESSING STEPS:
+1. Computes sample means meanA and meanB.
+2. Computes unbiased sample variances varA and varB.
+3. Computes standard error se = sqrt( varA/nA + varB/nB ).
+4. Computes 95% CI = [diff - 1.96*se, diff + 1.96*se].
+5. Computes z-score and approximate p-value.
+CALLED FROM: src/services/analysis/evidenceClassifier.ts:251
+ERRORS / EDGE CASES: Requires at least 5 observations per group to calculate variance; otherwise flags underpowered.
+
+--------------------------------------------------------------------------------
+FUNCTION: generateFindings
+FILE: src/services/analysis/evidenceClassifier.ts:158-343
+PURPOSE: Builds and ranks evidence findings for each attribute group and metric combination.
+PARAMETERS: creatives (Creative[]), performance (PerformanceRecord[]), sessionId? (string)
+RETURNS: Finding[]
+PROCESSING STEPS:
+1. Extracts binary attribute cohorts via extractAttributeGroups().
+2. Iterates applicable metrics (CTR, CVR, CPA, ROAS).
+3. Calls compareProportions or compareMeans.
+4. Classifies status: 'supported' (CI excludes 0), 'inconclusive' (CI spans 0), or 'underpowered' (N < 20).
+5. Generates human-readable summary and representative image examples.
+6. Sorts findings: supported first, then inconclusive, then underpowered, ordered by effect size.
+CALLED FROM: src/context/AnalysisContext.tsx:128, 211; src/data/realDataset.ts:145
+ERRORS / EDGE CASES: Skips metrics where denominators or sample observations are completely missing.
+
+--------------------------------------------------------------------------------
+FUNCTION: exportImageLevelCsv
+FILE: src/services/export/exportCsv.ts:15-119
+PURPOSE: Output A: Generates auditable CSV containing all 150 individual creative images.
+PARAMETERS: creatives (Creative[]), performanceRecords (PerformanceRecord[])
+RETURNS: string (RFC-4180 compliant CSV string)
+PROCESSING STEPS:
+1. Defines 22 column headers covering IDs, filenames, statuses, extracted visual heuristics, and metrics.
+2. Indexes performance records by creativeId in a Map for O(1) row lookup.
+3. Iterates every creative asset; formats CTR, CVR, CPC, CPA, ROAS.
+4. Escapes quotes via escapeCsvCell().
+5. Joins rows with CRLF line terminators.
+CALLED FROM: src/pages/ResultsPage.tsx:71; tests/unit/export.test.ts
+ERRORS / EDGE CASES: Assets missing performance records display '—' for metrics and 'IMAGE_MISSING' or 'UNMATCHED'.
+
+--------------------------------------------------------------------------------
+FUNCTION: exportFindingsToCsv
+FILE: src/services/export/exportCsv.ts:126-164
+PURPOSE: Output B: Serializes ranked statistical findings into a downloadable CSV string.
+PARAMETERS: findings (Finding[])
+RETURNS: string (RFC-4180 compliant CSV string)
+PROCESSING STEPS:
+1. Defines 14 headers (Rank, Attribute, Metric, Status, Effect Size, 95% CI, Sample Size, Group Values, Summary, Method, Limitations).
+2. Maps each finding, formatting effect size and CI based on metric type (rate vs currency vs multiplier).
+3. Joins rows with CRLF line terminators.
+CALLED FROM: src/pages/ResultsPage.tsx:79; tests/unit/export.test.ts
+ERRORS / EDGE CASES: Handles null confidence intervals and missing sample data cleanly.
+
+
+================================================================================
+8. JUDGE DEMONSTRATION CHEAT SHEET (18 COMMON QUESTIONS & ANSWERS)
+================================================================================
+
+QUESTION 1: Where does your application start?
+FILE: index.html (Lines 14, 20) -> src/main.tsx (Lines 6-10) -> src/app/App.tsx (Lines 6-12)
+FUNCTION: ReactDOM.createRoot().render()
+SPEAKING SCRIPT:
+"The application boots through index.html, where Vite mounts src/main.tsx into the DOM.
+main.tsx initializes React 18 Concurrent Mode and renders App.tsx, which wraps our
+client-side router with AnalysisProvider, establishing our global analysis state."
+
+--------------------------------------------------------------------------------
+QUESTION 2: Where do you upload the 150 images?
+FILE: src/features/upload/FileUpload.tsx (Lines 30-43) & src/pages/AnalyzePage.tsx (Lines 53-83)
+FUNCTION: handleImageChange() & handleFilesSelected()
+SPEAKING SCRIPT:
+"Image uploading is handled in FileUpload.tsx at line 30. Users can drag-and-drop or select
+multiple images. The component validates the MIME types to ensure valid PNG/JPG formats
+and delivers the File array directly to AnalyzePage."
+
+--------------------------------------------------------------------------------
+QUESTION 3: Where are the uploaded images stored?
+FILE: src/pages/AnalyzePage.tsx (Lines 129-134) & public/creatives/
+FUNCTION: URL.createObjectURL()
+SPEAKING SCRIPT:
+"To guarantee complete privacy, images are stored entirely in client browser memory.
+In AnalyzePage.tsx at line 132, we create ephemeral browser Object URLs using the HTML5
+Blob API. For our offline benchmark demonstration, the 150 pre-rendered PNGs are hosted
+locally in the public/creatives/ directory."
+
+--------------------------------------------------------------------------------
+QUESTION 4: Where is the image extraction implemented?
+FILE: src/services/analysis/featureExtraction.ts (Lines 54-224)
+FUNCTION: extractImageFeatures()
+SPEAKING SCRIPT:
+"The core image extraction engine is extractImageFeatures() in featureExtraction.ts at line 54.
+It instantiates an off-screen HTML5 canvas, resizes the ad image to a 32x32 pixel matrix,
+and extracts 4,096 raw RGBA bytes for mathematical feature extraction."
+
+--------------------------------------------------------------------------------
+QUESTION 5: How do you extract color and composition features?
+FILE: src/services/analysis/featureExtraction.ts (Lines 125-194)
+FUNCTION: extractImageFeatures()
+SPEAKING SCRIPT:
+"In featureExtraction.ts lines 125-194, we apply computer vision algorithms:
+Brightness uses the ITU-R Rec. 601 perceptual luminance formula.
+Visual Contrast is the standard deviation of luminance across pixels.
+Saturation is derived from RGB-to-HSV color space conversion.
+Color Palette is classified by clustering hue angles into warm, cool, natural, and monochrome.
+Composition complexity is computed using high-frequency edge transition density."
+
+--------------------------------------------------------------------------------
+QUESTION 6: Where do you read the CSV file?
+FILE: src/services/csv/parseCsv.ts (Lines 50-80) & src/services/csv/validateCsv.ts (Lines 27-240)
+FUNCTION: parseCsvFile() & validateAndNormalizeCsv()
+SPEAKING SCRIPT:
+"CSV parsing starts in parseCsv.ts line 50 using PapaParse with client-side streaming.
+Then in validateCsv.ts line 27, validateAndNormalizeCsv strips currency symbols, verifies
+positive impressions and clicks, audits data hygiene, and converts rows into typed PerformanceRecords."
+
+--------------------------------------------------------------------------------
+QUESTION 7: How do you match image filenames to CSV records?
+FILE: src/services/analysis/featureExtraction.ts (Lines 29-36, 355-537)
+FUNCTION: normalizeIdentifier() & reconcileCreativesAndImages()
+SPEAKING SCRIPT:
+"We built a resilient bidirectional matching algorithm in featureExtraction.ts line 355.
+First, normalizeIdentifier strips file extensions, underscores, and special characters—turning
+'ad_001.png' into 'ad001'. Then we run a 4-pass match: exact filename, exact ID, normalized ID,
+and substring token match, guaranteeing zero dropped records."
+
+--------------------------------------------------------------------------------
+QUESTION 8: Where are CTR, CVR, CPA, and ROAS handled?
+FILE: src/services/metrics/calculateMetrics.ts (Lines 7-71, 106-159)
+FUNCTION: calculateCtr(), calculateCvr(), calculateCpa(), calculateRoas(), calculateAggregates()
+SPEAKING SCRIPT:
+"Metric calculations are isolated in calculateMetrics.ts lines 7-71. Crucially, in
+calculateAggregates at line 106, we compute true aggregate ratios by dividing the sum of total clicks
+by total impressions, rather than committing the statistical error of averaging row-level percentages."
+
+--------------------------------------------------------------------------------
+QUESTION 9: How do you calculate effect sizes and confidence intervals?
+FILE: src/services/analysis/statisticalTests.ts (Lines 28-110, 116-181)
+FUNCTION: compareProportions() & compareMeans()
+SPEAKING SCRIPT:
+"In statisticalTests.ts line 28, compareProportions computes standard error and a 95% Wald confidence
+interval using the critical z-value 1.96 for rates like CTR and CVR.
+In line 116, compareMeans runs Welch's two-sample t-test with sample variance pooling for continuous
+metrics like CPA and ROAS."
+
+--------------------------------------------------------------------------------
+QUESTION 10: Where do you rank the creative attributes?
+FILE: src/services/analysis/evidenceClassifier.ts (Lines 330-341)
+FUNCTION: generateFindings()
+SPEAKING SCRIPT:
+"Findings are ranked in evidenceClassifier.ts at lines 330-341. We use a dual-criterion sort:
+First, by evidence status—statistically supported findings rank highest, followed by inconclusive,
+then underpowered. Second, within each status group, findings are sorted descending by absolute effect size."
+
+--------------------------------------------------------------------------------
+QUESTION 11: Why might a result be inconclusive?
+FILE: src/services/analysis/evidenceClassifier.ts (Lines 214-220, 257-263)
+FUNCTION: generateFindings()
+SPEAKING SCRIPT:
+"A finding is inconclusive when its 95% confidence interval spans zero—meaning the lower bound
+is negative and the upper bound is positive. In evidenceClassifier.ts line 216, if zero is within
+the interval, we cannot reject the null hypothesis of no effect at alpha = 0.05, so we label it
+'inconclusive' to maintain scientific integrity."
+
+--------------------------------------------------------------------------------
+QUESTION 12: Where is the issue of processing only 24 results handled?
+FILE: src/services/export/exportCsv.ts (Lines 15-164) & src/pages/ResultsPage.tsx (Lines 69-83, 98-125)
+FUNCTION: exportImageLevelCsv() vs exportFindingsToCsv()
+SPEAKING SCRIPT:
+"We solved this by establishing clear separation between two distinct outputs:
+Output A is the Creative-Level Analysis containing all 150 uploaded creative images, with their
+individual extracted features, matched metrics, and error states.
+Output B is the Aggregate Statistical Rankings containing 24 ranked hypothesis comparisons.
+On ResultsPage.tsx line 108 and in exportCsv.ts, users have dual export buttons and views for both."
+
+--------------------------------------------------------------------------------
+QUESTION 13: How do you verify that all uploaded images are processed?
+FILE: src/services/analysis/featureExtraction.ts (Lines 523-535) & src/pages/ResultsPage.tsx (Lines 128-160)
+FUNCTION: reconcileCreativesAndImages() & ProcessingDiagnostics banner
+SPEAKING SCRIPT:
+"We track end-to-end provenance using the ProcessingDiagnostics object created in featureExtraction.ts:523.
+On ResultsPage.tsx lines 128-160, we render a live diagnostics bar displaying: 150 images discovered,
+150 processed successfully, 150 matched to CSV, 0 dropped, and 24 aggregate comparisons generated."
+
+--------------------------------------------------------------------------------
+QUESTION 14: Where do you generate the final report?
+FILE: src/services/export/exportCsv.ts (Lines 15-180) & src/pages/ResultsPage.tsx (Lines 69-83)
+FUNCTION: exportImageLevelCsv(), exportFindingsToCsv(), downloadCsvFile()
+SPEAKING SCRIPT:
+"Report generation is implemented in exportCsv.ts. Lines 15-119 construct the 22-column image-level CSV,
+lines 126-164 format the 14-column statistical rankings CSV, and line 169 triggers an in-memory browser
+Blob download without touching any server."
+
+--------------------------------------------------------------------------------
+QUESTION 15: How does the frontend communicate with the backend?
+FILE: src/context/AnalysisContext.tsx (Lines 107-336)
+FUNCTION: AnalysisProvider
+SPEAKING SCRIPT:
+"Our architecture is 100% client-side. The frontend communicates with internal computational services
+via React Context and TypeScript services. By eliminating a remote backend, we eliminate cloud hosting
+costs, eliminate network latency, and guarantee advertiser data privacy."
+
+--------------------------------------------------------------------------------
+QUESTION 16: Where are failures handled?
+FILE: src/services/analysis/featureExtraction.ts (Lines 599-612) & src/services/csv/validateCsv.ts (Lines 60-185)
+FUNCTION: processBatchImageFeatures() & validateAndNormalizeCsv()
+SPEAKING SCRIPT:
+"Failures are caught gracefully at multiple levels:
+In validateCsv.ts, malformed rows generate non-fatal ValidationIssues displayed in the UI banner.
+In featureExtraction.ts line 599, per-image try-catches record errors in item.creative.extractionError,
+ensuring that if one image is corrupt, the other 149 images continue processing uninterrupted."
+
+--------------------------------------------------------------------------------
+QUESTION 17: How can you test the complete pipeline?
+FILE: tests/unit/pipeline-reconciliation.test.ts (Lines 1-261) & package.json (Line 11)
+FUNCTION: npm run test (vitest run)
+SPEAKING SCRIPT:
+"We maintain 38 automated unit and integration tests across 7 test files using Vitest.
+Tests in pipeline-reconciliation.test.ts explicitly verify identifier normalization, edge cases
+with fewer than 24 images, the full 150-image benchmark dataset, and both export formats.
+Running 'npm run test' verifies the entire pipeline in under 3 seconds."
+
+--------------------------------------------------------------------------------
+QUESTION 18: Which parts are custom code and which use external libraries?
+FILE: src/services/ vs package.json
+SPEAKING SCRIPT:
+"We wrote 100% custom TypeScript code for:
+1. The HTML5 Canvas computer vision extraction engine (featureExtraction.ts).
+2. The bidirectional reconciliation algorithm (featureExtraction.ts).
+3. All statistical tests and confidence intervals (statisticalTests.ts).
+4. The evidence classification and ranking system (evidenceClassifier.ts).
+5. All CSV report formatters and serializers (exportCsv.ts).
+We leveraged trusted third-party libraries only for standard infrastructure: PapaParse for raw CSV
+tokenization, Recharts for SVG rendering, React Router for navigation, and Lucide for icons."
+
+
+================================================================================
+9. RELIABLE LINE-NUMBER NAVIGATION METHOD
+================================================================================
+
+9.1 QUICK NAVIGATION IN MODERN CODE EDITORS (VS CODE / CURSOR / ANTIGRAVITY)
+When demonstrating live to judges, navigate instantly to exact code locations:
+
+- OPEN FILE BY NAME:
+  Windows / Linux: Ctrl + P  -> Type filename (e.g. featureExtraction.ts)
+  macOS:           Cmd + P   -> Type filename
+
+- JUMP DIRECTLY TO LINE NUMBER:
+  Windows / Linux: Ctrl + G  -> Type line number (e.g. 54) -> Press Enter
+  macOS:           Ctrl + G (or Cmd + L) -> Type line number -> Press Enter
+
+- COMBINED SHORTCUT (OPEN FILE & GO TO LINE):
+  Windows / Linux: Ctrl + P  -> Type "featureExtraction.ts:54" -> Press Enter
+  macOS:           Cmd + P   -> Type "featureExtraction.ts:54" -> Press Enter
+
+9.2 LINE NUMBER STABILITY NOTICE
+All line numbers documented in this guide are verified against the active source files.
+If significant code refactoring or additional imports are introduced, line numbers may
+shift slightly. Regenerate or cross-reference function names if edits occur.
+
+
+================================================================================
+10. TOP 5 CRITICAL SOURCE FILES TO MASTER BEFORE DEMO
+================================================================================
+
+If you only have 15 minutes before your presentation, master these 5 source files:
+
+1. src/services/analysis/featureExtraction.ts (Computer Vision & Reconciliation)
+   Why: Contains the HTML5 Canvas image feature extraction (extractImageFeatures:54),
+   the identifier normalizer (normalizeIdentifier:29), and the bidirectional reconciliation
+   algorithm that guarantees zero dropped records (reconcileCreativesAndImages:355).
+
+2. src/services/metrics/calculateMetrics.ts (Core Ad Formulas & True Aggregates)
+   Why: Proves mathematical rigor. Shows safe CTR, CVR, CPA, ROAS calculations (lines 7-71)
+   and true aggregate sums rather than flawed averages of ratios (calculateAggregates:106).
+
+3. src/services/analysis/statisticalTests.ts (Inferential Statistics Engine)
+   Why: Answers every statistics question. Shows two-proportion z-tests, Welch's t-test,
+   and exact 95% Wald confidence interval equations (lines 28-181).
+
+4. src/services/analysis/evidenceClassifier.ts (Hypothesis Generation & Ranking)
+   Why: Shows how creative attributes are grouped into contrasting cohorts and ranked
+   by evidence status ('supported', 'inconclusive', 'underpowered') (lines 158-343).
+
+5. src/services/export/exportCsv.ts (Dual Reports: 150 Creatives vs. 24 Findings)
+   Why: Directly answers the "150 images vs. 24 results" question. Shows the 22-column
+   image-level CSV export for all 150 creatives (line 15) and the 14-column aggregate findings
+   export (line 126).
+
+================================================================================
+END OF GUIDE -- GOOD LUCK WITH YOUR DEMONSTRATION!
+================================================================================

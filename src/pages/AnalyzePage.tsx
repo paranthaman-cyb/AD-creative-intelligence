@@ -8,9 +8,12 @@ import { Button } from '../components/ui/Button';
 import { parseCsvFile, parseCsvString } from '../services/csv/parseCsv';
 import { autoDetectColumnMapping, validateColumnMapping } from '../services/csv/columnMapping';
 import { validateAndNormalizeCsv, CsvValidationResult } from '../services/csv/validateCsv';
-import { extractImageFeatures, buildCreativeRecord } from '../services/analysis/featureExtraction';
+import {
+  reconcileCreativesAndImages,
+  processBatchImageFeatures,
+} from '../services/analysis/featureExtraction';
 import { useAnalysis } from '../context/AnalysisContext';
-import { ColumnMapping, Creative } from '../types';
+import { ColumnMapping } from '../types';
 import { Check, Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
 import { SAMPLE_CSV_CONTENT } from '../data/demo/demoData';
 
@@ -107,89 +110,40 @@ export const AnalyzePage: React.FC = () => {
 
     setStep(3);
     setIsAnalyzing(true);
-    setAnalyzeProgress('Extracting visual features and heuristics from ad images...');
+    setAnalyzeProgress(`Discovering and reconciling ${selectedImages.length} uploaded creative images with CSV records...`);
 
     try {
-      // Build creative records
-      const creativesMap = new Map<string, Creative>();
-
-      // Index uploaded images by filename
-      const imageMap = new Map<string, File>();
-      for (const img of selectedImages) {
-        imageMap.set(img.name, img);
-      }
-
-      // Group performance records by creativeId
-      const uniqueCreativeIds = Array.from(
-        new Set(validationResult.records.map((r) => r.creativeId).filter(Boolean) as string[])
+      // 1. Reconcile uploaded files and CSV performance records
+      const { items } = reconcileCreativesAndImages(
+        selectedImages,
+        validationResult.records,
+        columnMapping
       );
 
-      for (let i = 0; i < uniqueCreativeIds.length; i++) {
-        const id = uniqueCreativeIds[i];
-        setAnalyzeProgress(`Analyzing creative asset ${i + 1} of ${uniqueCreativeIds.length}...`);
+      // 2. Concurrency-controlled batch processing of image visual features
+      setAnalyzeProgress(`Extracting visual features for ${selectedImages.length} images in batches...`);
+      const finalDiag = await processBatchImageFeatures(items, 10, (done, total) => {
+        setAnalyzeProgress(`Extracting visual features: ${done} of ${total} assets processed...`);
+      });
 
-        // Check if an image matches id or filename
-        const matchedImage = imageMap.get(id) || selectedImages[i % Math.max(1, selectedImages.length)];
-        let extractedFeatures = undefined;
-        let imageUrl = undefined;
-
-        if (matchedImage) {
-          try {
-            extractedFeatures = await extractImageFeatures(matchedImage);
-            imageUrl = URL.createObjectURL(matchedImage);
-          } catch {
-            // Heuristic extraction fallback
-          }
+      // 3. Assign temporary browser object URLs for images so UI can render them
+      for (const it of items) {
+        if (it.imageFile && !it.creative.imageUrl) {
+          it.creative.imageUrl = URL.createObjectURL(it.imageFile);
         }
-
-        // Extract imported attributes from raw fields
-        const sampleRecord = validationResult.records.find((r) => r.creativeId === id);
-        const importedAttrs: Record<string, string> = {};
-        if (sampleRecord) {
-          for (const [k, v] of Object.entries(sampleRecord.rawFields)) {
-            if (
-              ![
-                'ad_id',
-                'creative_id',
-                'impressions',
-                'clicks',
-                'conversions',
-                'spend',
-                'revenue',
-                'id',
-              ].includes(k.toLowerCase()) &&
-              v !== null &&
-              v !== undefined
-            ) {
-              importedAttrs[k] = String(v);
-            }
-          }
-        }
-
-        const creative = buildCreativeRecord(
-          `creative_${id}`,
-          id,
-          sampleRecord?.rawFields.ad_name ? String(sampleRecord.rawFields.ad_name) : `Creative ${id}`,
-          extractedFeatures,
-          importedAttrs,
-          imageUrl,
-          matchedImage?.name
-        );
-
-        creativesMap.set(id, creative);
       }
 
       setAnalyzeProgress('Calculating statistical comparisons and 95% confidence intervals...');
-      await new Promise((r) => setTimeout(r, 400));
+      await new Promise((r) => setTimeout(r, 300));
 
-      const finalCreatives = Array.from(creativesMap.values());
-      setUploadedDataset(finalCreatives, validationResult.records, selectedCsv?.name || 'Uploaded Dataset');
+      const finalCreatives = items.map((it) => it.creative);
+      setUploadedDataset(finalCreatives, validationResult.records, selectedCsv?.name || 'Uploaded Dataset', finalDiag);
 
       setStep(4);
       // Navigate to results
       setTimeout(() => {
         navigate('/results');
-      }, 500);
+      }, 400);
     } catch (err) {
       alert('Error during analysis: ' + (err instanceof Error ? err.message : String(err)));
       setStep(2);

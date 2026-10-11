@@ -26,6 +26,8 @@ export interface CreativeAttribute {
   reviewed: boolean;
 }
 
+export type ProcessingStatus = 'success' | 'failed' | 'skipped';
+
 export interface Creative {
   id: string;
   analysisSessionId: string;
@@ -41,6 +43,8 @@ export interface Creative {
   dominantColor?: string | null;
   attributes: CreativeAttribute[];
   matchStatus: MatchStatus;
+  processingStatus?: ProcessingStatus;
+  extractionError?: string | null;
 }
 
 export interface PerformanceRecord {
@@ -98,7 +102,21 @@ export interface ColumnMapping {
   campaignId?: string;
   date?: string;
   name?: string;
+  filename?: string;
   [key: string]: string | undefined;
+}
+
+export interface ProcessingDiagnostics {
+  imagesUploaded: number;
+  imagesDiscovered: number;
+  imagesProcessedSuccessfully: number;
+  imagesFailed: number;
+  csvRecordsLoaded: number;
+  imagesMatchedToCsv: number;
+  imagesUnmatched: number;
+  csvRecordsWithoutImage: number;
+  aggregateComparisonsGenerated: number;
+  errors: { id?: string; filename?: string; message: string }[];
 }
 
 export interface AnalysisSession {

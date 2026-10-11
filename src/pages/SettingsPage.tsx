@@ -3,7 +3,7 @@ import { Header } from '../components/layout/Header';
 import { Card } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { useAnalysis } from '../context/AnalysisContext';
-import { downloadCsvFile } from '../services/export/exportCsv';
+import { downloadCsvFile, exportImageLevelCsv, exportFindingsToCsv } from '../services/export/exportCsv';
 import {
   Sparkles,
   Download,
@@ -12,6 +12,7 @@ import {
   Trash2,
   Database,
   Layers,
+  FileSpreadsheet,
 } from 'lucide-react';
 
 export const SettingsPage: React.FC = () => {
@@ -23,6 +24,8 @@ export const SettingsPage: React.FC = () => {
     resetSession,
     creatives,
     performanceRecords,
+    findings,
+    diagnostics,
     datasetName,
   } = useAnalysis();
 
@@ -36,6 +39,16 @@ export const SettingsPage: React.FC = () => {
       .catch(() => {
         alert('Could not download original CSV file.');
       });
+  };
+
+  const handleExportImageLevelCsv = () => {
+    const csvData = exportImageLevelCsv(creatives, performanceRecords);
+    downloadCsvFile(`ad_creatives_image_level_${session.id}.csv`, csvData);
+  };
+
+  const handleExportFindingsCsv = () => {
+    const csvData = exportFindingsToCsv(findings);
+    downloadCsvFile(`ad_creative_rankings_${session.id}.csv`, csvData);
   };
 
   return (
@@ -95,10 +108,28 @@ export const SettingsPage: React.FC = () => {
           <Button
             variant="outline"
             size="sm"
+            icon={<FileSpreadsheet className="w-4 h-4 text-brand-700" />}
+            onClick={handleExportImageLevelCsv}
+          >
+            Export Creatives CSV ({creatives.length})
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
+            icon={<Download className="w-4 h-4" />}
+            onClick={handleExportFindingsCsv}
+          >
+            Export Rankings CSV ({findings.length})
+          </Button>
+
+          <Button
+            variant="outline"
+            size="sm"
             icon={<Download className="w-4 h-4" />}
             onClick={handleDownloadOriginalCsv}
           >
-            Download creative_performance.csv
+            Original CSV
           </Button>
 
           <Button
@@ -111,6 +142,34 @@ export const SettingsPage: React.FC = () => {
           </Button>
         </div>
       </Card>
+
+      {/* Diagnostics Card */}
+      {diagnostics && (
+        <Card className="p-6">
+          <div className="flex items-center gap-2 mb-3 text-emerald-700">
+            <CheckCircle2 className="w-5 h-5" />
+            <h3 className="text-base font-bold text-app-text">Pipeline Reconciliation Diagnostics</h3>
+          </div>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+            <div className="p-3 bg-lavender-50 rounded-xl border border-app-border">
+              <span className="text-app-muted block">Images Discovered</span>
+              <span className="font-extrabold text-app-text text-base">{diagnostics.imagesDiscovered}</span>
+            </div>
+            <div className="p-3 bg-lavender-50 rounded-xl border border-app-border">
+              <span className="text-app-muted block">Processed Successfully</span>
+              <span className="font-extrabold text-emerald-700 text-base">{diagnostics.imagesProcessedSuccessfully}</span>
+            </div>
+            <div className="p-3 bg-lavender-50 rounded-xl border border-app-border">
+              <span className="text-app-muted block">Matched to CSV</span>
+              <span className="font-extrabold text-brand-700 text-base">{diagnostics.imagesMatchedToCsv}</span>
+            </div>
+            <div className="p-3 bg-lavender-50 rounded-xl border border-app-border">
+              <span className="text-app-muted block">Aggregate Findings</span>
+              <span className="font-extrabold text-brand-700 text-base">{findings.length}</span>
+            </div>
+          </div>
+        </Card>
+      )}
 
       {/* Dataset Provenance & Integrity Card */}
       <Card className="p-6">

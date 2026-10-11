@@ -52,47 +52,47 @@ export const DashboardPage: React.FC = () => {
 
       {/* 4 Primary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
-        <Card className="flex items-center gap-4 p-5 hover:shadow-card-hover transition-all">
-          <div className="w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center shrink-0">
-            <Layers className="w-6 h-6" />
+        <Card className="flex items-center gap-3.5 sm:gap-4 p-4 sm:p-5 hover:shadow-card-hover transition-all min-w-0">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center shrink-0">
+            <Layers className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <span className="text-xs font-semibold text-app-muted block">Creatives Analyzed</span>
-            <span className="text-2xl font-extrabold text-app-text">
+          <div className="min-w-0 flex-1">
+            <span className="text-xs font-semibold text-app-muted block truncate">Creatives Analyzed</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-app-text tracking-tight block my-0.5">
               {aggregates.totalCreatives}
             </span>
             <span className="text-[11px] font-semibold text-app-muted block">
-              {isDemoMode ? 'Synthetic Cohort' : 'Meta Feed (800x800)'}
+              {isDemoMode ? 'Synthetic Cohort' : 'Meta Feed (800×800)'}
             </span>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5 hover:shadow-card-hover transition-all">
-          <div className="w-12 h-12 rounded-2xl bg-lavender-100 text-brand-600 flex items-center justify-center shrink-0">
-            <Eye className="w-6 h-6" />
+        <Card className="flex items-center gap-3.5 sm:gap-4 p-4 sm:p-5 hover:shadow-card-hover transition-all min-w-0">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-lavender-100 text-brand-600 flex items-center justify-center shrink-0">
+            <Eye className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <span className="text-xs font-semibold text-app-muted block">Total Impressions</span>
-            <span className="text-2xl font-extrabold text-app-text">
+          <div className="min-w-0 flex-1">
+            <span className="text-xs font-semibold text-app-muted block truncate">Total Impressions</span>
+            <span className="text-xl sm:text-2xl font-extrabold text-app-text tracking-tight block my-0.5">
               {formatNumber(aggregates.totalImpressions)}
             </span>
             <span className="text-[11px] font-semibold text-app-muted block">
-              Across all placements
+              All ad placements
             </span>
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5 hover:shadow-card-hover transition-all">
-          <div className="w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center shrink-0">
-            <MousePointerClick className="w-6 h-6" />
+        <Card className="flex items-center gap-3.5 sm:gap-4 p-4 sm:p-5 hover:shadow-card-hover transition-all min-w-0">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center shrink-0">
+            <MousePointerClick className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <span className="text-xs font-semibold text-app-muted block">Total Clicks</span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-extrabold text-app-text">
+          <div className="min-w-0 flex-1">
+            <span className="text-xs font-semibold text-app-muted block truncate">Total Clicks</span>
+            <div className="flex items-baseline gap-1.5 flex-wrap my-0.5">
+              <span className="text-xl sm:text-2xl font-extrabold text-app-text tracking-tight">
                 {formatNumber(aggregates.totalClicks)}
               </span>
-              <span className="text-xs font-bold text-brand-700">
+              <span className="text-xs font-bold text-brand-700 shrink-0">
                 ({formatPercent(aggregates.ctr)})
               </span>
             </div>
@@ -102,18 +102,18 @@ export const DashboardPage: React.FC = () => {
           </div>
         </Card>
 
-        <Card className="flex items-center gap-4 p-5 hover:shadow-card-hover transition-all">
-          <div className="w-12 h-12 rounded-2xl bg-status-successBg text-status-success flex items-center justify-center shrink-0">
-            <CheckCircle className="w-6 h-6" />
+        <Card className="flex items-center gap-3.5 sm:gap-4 p-4 sm:p-5 hover:shadow-card-hover transition-all min-w-0">
+          <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-status-successBg text-status-success flex items-center justify-center shrink-0">
+            <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6" />
           </div>
-          <div>
-            <span className="text-xs font-semibold text-app-muted block">Total Purchases</span>
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-2xl font-extrabold text-app-text">
+          <div className="min-w-0 flex-1">
+            <span className="text-xs font-semibold text-app-muted block truncate">Total Purchases</span>
+            <div className="flex items-baseline gap-1.5 flex-wrap my-0.5">
+              <span className="text-xl sm:text-2xl font-extrabold text-app-text tracking-tight">
                 {aggregates.totalConversions !== null ? formatNumber(aggregates.totalConversions) : 'N/A'}
               </span>
               {aggregates.cvr !== null && (
-                <span className="text-xs font-bold text-status-success">
+                <span className="text-xs font-bold text-status-success shrink-0">
                   ({formatPercent(aggregates.cvr)})
                 </span>
               )}
@@ -128,43 +128,43 @@ export const DashboardPage: React.FC = () => {
       {/* Secondary Financial KPI Strip */}
       {aggregates.totalSpend !== null && (
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-          <div className="bg-white rounded-xl border border-app-border p-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-lavender-100 text-brand-700 flex items-center justify-center">
+          <div className="bg-white rounded-xl border border-app-border p-4 flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-lg bg-lavender-100 text-brand-700 flex items-center justify-center shrink-0">
               <DollarSign className="w-5 h-5" />
             </div>
-            <div>
-              <span className="text-[11px] text-app-muted uppercase font-bold tracking-wider block">
+            <div className="min-w-0 flex-1">
+              <span className="text-[11px] text-app-muted uppercase font-bold tracking-wider block truncate">
                 Total Ad Spend
               </span>
-              <span className="text-lg font-bold text-app-text">
+              <span className="text-base sm:text-lg font-bold text-app-text block truncate">
                 {formatCurrency(aggregates.totalSpend)}
               </span>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-app-border p-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-status-successBg text-status-success flex items-center justify-center">
+          <div className="bg-white rounded-xl border border-app-border p-4 flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-lg bg-status-successBg text-status-success flex items-center justify-center shrink-0">
               <TrendingUp className="w-5 h-5" />
             </div>
-            <div>
-              <span className="text-[11px] text-app-muted uppercase font-bold tracking-wider block">
+            <div className="min-w-0 flex-1">
+              <span className="text-[11px] text-app-muted uppercase font-bold tracking-wider block truncate">
                 Total Attributed Revenue
               </span>
-              <span className="text-lg font-bold text-app-text">
+              <span className="text-base sm:text-lg font-bold text-app-text block truncate">
                 {formatCurrency(aggregates.totalRevenue)}
               </span>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl border border-app-border p-4 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm">
+          <div className="bg-white rounded-xl border border-app-border p-4 flex items-center gap-3 min-w-0">
+            <div className="w-9 h-9 rounded-lg bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-sm shrink-0">
               ROAS
             </div>
-            <div>
-              <span className="text-[11px] text-app-muted uppercase font-bold tracking-wider block">
+            <div className="min-w-0 flex-1">
+              <span className="text-[11px] text-app-muted uppercase font-bold tracking-wider block truncate">
                 Return on Ad Spend
               </span>
-              <span className="text-lg font-bold text-brand-700">
+              <span className="text-base sm:text-lg font-bold text-brand-700 block truncate">
                 {aggregates.roas !== null ? `${aggregates.roas.toFixed(2)}x` : '—'}
               </span>
             </div>

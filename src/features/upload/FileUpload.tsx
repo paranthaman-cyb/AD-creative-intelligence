@@ -144,8 +144,8 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                 Clear all images
               </button>
             </div>
-            <div className="flex gap-2 overflow-x-auto pb-2">
-              {selectedImages.map((img, idx) => (
+            <div className="flex gap-2 overflow-x-auto pb-2 items-center">
+              {selectedImages.slice(0, 16).map((img, idx) => (
                 <div
                   key={`${img.name}_${idx}`}
                   className="relative group w-16 h-16 rounded-lg border border-app-border overflow-hidden shrink-0 bg-lavender-50"
@@ -164,6 +164,13 @@ export const FileUpload: React.FC<FileUploadProps> = ({
                   </button>
                 </div>
               ))}
+              {selectedImages.length > 16 && (
+                <div className="w-16 h-16 rounded-lg border border-dashed border-brand-300 bg-brand-50 flex items-center justify-center shrink-0 text-center p-1">
+                  <span className="text-[11px] font-bold text-brand-700">
+                    +{selectedImages.length - 16} more
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         )}

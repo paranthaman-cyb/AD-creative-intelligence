@@ -7,6 +7,7 @@ import {
   AggregateMetrics,
   TrendDataPoint,
   MetricKey,
+  ProcessingDiagnostics,
 } from '../types';
 import {
   REAL_CREATIVES,
@@ -38,13 +39,46 @@ export interface AnalysisContextType {
   isLoading: boolean;
   errorMessage: string | null;
   datasetName: string;
+  diagnostics: ProcessingDiagnostics | null;
+  setDiagnostics: (diag: ProcessingDiagnostics | null) => void;
   loadRealDataset: () => void;
   loadDemoData: () => void;
-  setUploadedDataset: (creatives: Creative[], records: PerformanceRecord[], sessionName?: string) => void;
+  setUploadedDataset: (
+    creatives: Creative[],
+    records: PerformanceRecord[],
+    sessionName?: string,
+    diagnostics?: ProcessingDiagnostics
+  ) => void;
   updateCreativeAttribute: (creativeId: string, attrKey: string, newValue: string) => void;
   resetSession: () => void;
   getFindingById: (id: string) => Finding | undefined;
 }
+
+const realDiagnostics: ProcessingDiagnostics = {
+  imagesUploaded: 150,
+  imagesDiscovered: 150,
+  imagesProcessedSuccessfully: 150,
+  imagesFailed: 0,
+  csvRecordsLoaded: 150,
+  imagesMatchedToCsv: 150,
+  imagesUnmatched: 0,
+  csvRecordsWithoutImage: 0,
+  aggregateComparisonsGenerated: 24,
+  errors: [],
+};
+
+const demoDiagnostics: ProcessingDiagnostics = {
+  imagesUploaded: 60,
+  imagesDiscovered: 60,
+  imagesProcessedSuccessfully: 60,
+  imagesFailed: 0,
+  csvRecordsLoaded: 60,
+  imagesMatchedToCsv: 60,
+  imagesUnmatched: 0,
+  csvRecordsWithoutImage: 0,
+  aggregateComparisonsGenerated: 24,
+  errors: [],
+};
 
 const realSession: AnalysisSession = {
   id: 'halcyon_meta_2026',
@@ -80,6 +114,7 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [isDemoMode, setIsDemoMode] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [diagnostics, setDiagnostics] = useState<ProcessingDiagnostics | null>(realDiagnostics);
 
   const datasetName = useMemo(() => {
     if (isDemoMode) return 'Synthetic Demo Dataset (60 Creatives)';
@@ -140,6 +175,7 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setCreatives(REAL_CREATIVES);
       setPerformanceRecords(REAL_PERFORMANCE_RECORDS);
       setCustomFindings(REAL_FINDINGS);
+      setDiagnostics(realDiagnostics);
       setIsDemoMode(false);
       setSelectedMetric('ctr');
       setIsLoading(false);
@@ -154,6 +190,7 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       setCreatives(DEMO_CREATIVES);
       setPerformanceRecords(DEMO_PERFORMANCE_RECORDS);
       setCustomFindings(DEMO_FINDINGS);
+      setDiagnostics(demoDiagnostics);
       setIsDemoMode(true);
       setSelectedMetric('ctr');
       setIsLoading(false);
@@ -161,12 +198,32 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   }, []);
 
   const setUploadedDataset = useCallback(
-    (newCreatives: Creative[], newRecords: PerformanceRecord[], sessionName = 'Uploaded Analysis') => {
+    (
+      newCreatives: Creative[],
+      newRecords: PerformanceRecord[],
+      sessionName = 'Uploaded Analysis',
+      customDiagnostics?: ProcessingDiagnostics
+    ) => {
       setIsLoading(true);
       setErrorMessage(null);
       try {
         const newSessionId = `session_${Date.now()}`;
         const newFindings = generateFindings(newCreatives, newRecords, newSessionId);
+
+        const diag: ProcessingDiagnostics = customDiagnostics || {
+          imagesUploaded: newCreatives.filter((c) => c.imageFileName).length,
+          imagesDiscovered: newCreatives.filter((c) => c.imageFileName).length,
+          imagesProcessedSuccessfully: newCreatives.filter((c) => c.processingStatus === 'success').length,
+          imagesFailed: newCreatives.filter((c) => c.processingStatus === 'failed').length,
+          csvRecordsLoaded: newRecords.length,
+          imagesMatchedToCsv: newCreatives.filter((c) => c.matchStatus === 'matched').length,
+          imagesUnmatched: newCreatives.filter((c) => c.matchStatus === 'unmatched').length,
+          csvRecordsWithoutImage: newCreatives.filter((c) => c.matchStatus === 'image_missing').length,
+          aggregateComparisonsGenerated: newFindings.length,
+          errors: [],
+        };
+        diag.aggregateComparisonsGenerated = newFindings.length;
+        setDiagnostics(diag);
 
         setSession({
           id: newSessionId,
@@ -263,6 +320,8 @@ export const AnalysisProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         isLoading,
         errorMessage,
         datasetName,
+        diagnostics,
+        setDiagnostics,
         loadRealDataset,
         loadDemoData,
         setUploadedDataset,

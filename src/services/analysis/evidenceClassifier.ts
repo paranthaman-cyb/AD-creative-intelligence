@@ -226,9 +226,13 @@ export function generateFindings(
             const p = performance.find((r) => r.creativeId === (c.sourceCreativeId || c.id));
             if (!p) return null;
             if (metric === 'cpa') {
-              return p.conversions && p.conversions > 0 && p.spend ? p.spend / p.conversions : null;
+              return p.conversions && p.conversions > 0 && p.spend !== null && p.spend !== undefined
+                ? p.spend / p.conversions
+                : null;
             } else {
-              return p.spend && p.spend > 0 && p.revenue !== null ? p.revenue / p.spend : null;
+              return p.spend && p.spend > 0 && p.revenue !== null && p.revenue !== undefined
+                ? p.revenue / p.spend
+                : null;
             }
           }).filter((v): v is number => v !== null && !isNaN(v));
         };
@@ -263,7 +267,13 @@ export function generateFindings(
       const higherOrLower = diff >= 0 ? 'higher' : 'lower';
       const metricLabel = getMetricShortLabel(metric);
       const isRate = metric === 'ctr' || metric === 'cvr';
-      const formattedDiff = isRate ? formatPercent(Math.abs(diff)) : `${diff.toFixed(2)}`;
+      const formattedDiff = isRate
+        ? formatPercent(Math.abs(diff))
+        : metric === 'cpa' || metric === 'cpc'
+        ? `$${Math.abs(diff).toFixed(2)}`
+        : metric === 'roas'
+        ? `${Math.abs(diff).toFixed(2)}x`
+        : `${diff.toFixed(2)}`;
       const summary = `${group.groupB.label} is associated with ${formattedDiff} ${higherOrLower} ${metricLabel} compared to ${group.groupA.label}.`;
 
       // Representative creative examples

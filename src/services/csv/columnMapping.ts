@@ -8,6 +8,7 @@ export const CANONICAL_FIELDS: { key: keyof ColumnMapping; label: string; requir
   { key: 'spend', label: 'Spend ($)', required: false, description: 'Advertising expenditure' },
   { key: 'revenue', label: 'Revenue ($)', required: false, description: 'Gross revenue generated' },
   { key: 'name', label: 'Creative Name / Headline', required: false, description: 'Display name or title of the ad' },
+  { key: 'filename', label: 'Image Filename', required: false, description: 'Filename of the image asset (e.g. ad_001.png)' },
   { key: 'campaignId', label: 'Campaign ID / Name', required: false, description: 'Associated advertising campaign' },
   { key: 'date', label: 'Date', required: false, description: 'Record date for trend calculation' },
 ];
@@ -20,6 +21,7 @@ const AUTO_DETECT_PATTERNS: Record<keyof ColumnMapping, RegExp[]> = {
   spend: [/^(spend|cost|amount_spent|budget|expenditure)$/i, /spend/i, /cost/i],
   revenue: [/^(revenue|total_revenue|sales|conversion_value|value)$/i, /rev/i, /sales/i],
   name: [/^(ad_name|creative_name|name|headline|title)$/i, /name/i, /title/i],
+  filename: [/^(filename|file_name|image_file|image_filename|file|asset_name|image)$/i, /filename/i],
   campaignId: [/^(campaign_id|campaign|campaign_name|utm_campaign)$/i, /camp/i],
   date: [/^(date|day|time|timestamp|period)$/i, /date/i],
 };

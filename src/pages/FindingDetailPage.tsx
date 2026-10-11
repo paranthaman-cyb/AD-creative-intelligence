@@ -60,51 +60,51 @@ export const FindingDetailPage: React.FC = () => {
 
       {/* Finding Title & Status Badge */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-3 flex-wrap">
             <h1 className="text-2xl sm:text-3xl font-extrabold text-app-text tracking-tight">
               {finding.attributeLabel} vs {getMetricShortLabel(finding.metric)}
             </h1>
             <Badge status={finding.status} />
           </div>
-          <p className="text-sm text-app-muted mt-1">{finding.summary}</p>
+          <p className="text-sm text-app-muted mt-1 max-w-3xl leading-normal">{finding.summary}</p>
         </div>
       </div>
 
       {/* 4 Top Metric Cards matching UI Reference */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <Card className="p-4 sm:p-5">
-          <span className="text-[10px] uppercase font-bold text-app-muted tracking-wider block">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3.5 sm:gap-4">
+        <Card className="p-3.5 sm:p-5 min-w-0 flex flex-col justify-between">
+          <span className="text-[10px] uppercase font-bold text-app-muted tracking-wider block truncate">
             Effect Size
           </span>
-          <span className="text-2xl font-extrabold text-brand-700 mt-1 block">
+          <span className="text-xl sm:text-2xl font-extrabold text-brand-700 mt-1 block truncate">
             {formatEffectSize(finding.effectSize, finding.metric)}
           </span>
         </Card>
 
-        <Card className="p-4 sm:p-5">
-          <span className="text-[10px] uppercase font-bold text-app-muted tracking-wider block">
+        <Card className="p-3.5 sm:p-5 min-w-0 flex flex-col justify-between">
+          <span className="text-[10px] uppercase font-bold text-app-muted tracking-wider block truncate">
             95% Confidence Interval
           </span>
-          <span className="text-2xl font-extrabold text-app-text mt-1 block">
+          <span className="text-xl sm:text-2xl font-extrabold text-app-text mt-1 block truncate">
             {formatConfidenceInterval(finding.confidenceInterval, finding.metric)}
           </span>
         </Card>
 
-        <Card className="p-4 sm:p-5">
-          <span className="text-[10px] uppercase font-bold text-app-muted tracking-wider block">
+        <Card className="p-3.5 sm:p-5 min-w-0 flex flex-col justify-between">
+          <span className="text-[10px] uppercase font-bold text-app-muted tracking-wider block truncate">
             Sample Size
           </span>
-          <span className="text-2xl font-extrabold text-app-text mt-1 block">
+          <span className="text-xl sm:text-2xl font-extrabold text-app-text mt-1 block truncate">
             n = {finding.sampleSize}
           </span>
         </Card>
 
-        <Card className="p-4 sm:p-5">
-          <span className="text-[10px] uppercase font-bold text-app-muted tracking-wider block">
+        <Card className="p-3.5 sm:p-5 min-w-0 flex flex-col justify-between">
+          <span className="text-[10px] uppercase font-bold text-app-muted tracking-wider block truncate">
             Metric
           </span>
-          <span className="text-2xl font-extrabold text-app-text mt-1 block">
+          <span className="text-xl sm:text-2xl font-extrabold text-app-text mt-1 block truncate">
             {getMetricShortLabel(finding.metric)}
           </span>
         </Card>

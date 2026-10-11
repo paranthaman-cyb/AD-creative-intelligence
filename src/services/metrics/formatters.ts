@@ -40,19 +40,26 @@ export function formatEffectSize(val: number | null | undefined, metric?: Metric
   if (val === null || val === undefined || isNaN(val)) return '—';
   const sign = val > 0 ? '+' : '';
   if (metric === 'cpc' || metric === 'cpa') {
-    // Relative percent change or absolute dollar change
-    // Using percentage for effect size comparison across groups
-    return `${sign}${(val * 100).toFixed(1)}%`;
+    return `${sign}${formatCurrency(val, 2)}`;
   }
-  // For CTR, CVR, absolute or relative difference in percentage points
+  if (metric === 'roas') {
+    return `${sign}${val.toFixed(2)}x`;
+  }
+  // For CTR, CVR, absolute difference in percentage points
   return `${sign}${(val * 100).toFixed(1)}%`;
 }
 
 export function formatConfidenceInterval(
   ci: [number, number] | null | undefined,
-  _metric?: MetricKey
+  metric?: MetricKey
 ): string {
   if (!ci || ci.length !== 2 || isNaN(ci[0]) || isNaN(ci[1])) return '—';
+  if (metric === 'cpc' || metric === 'cpa') {
+    return `[${formatCurrency(ci[0], 2)}, ${formatCurrency(ci[1], 2)}]`;
+  }
+  if (metric === 'roas') {
+    return `[${ci[0].toFixed(2)}x, ${ci[1].toFixed(2)}x]`;
+  }
   const lower = (ci[0] * 100).toFixed(1);
   const upper = (ci[1] * 100).toFixed(1);
   return `[${lower}%, ${upper}%]`;
